@@ -96,9 +96,8 @@ import {
   updatePassword
 } from "firebase/auth";
 
-// --- KONFIGURASI FIREBASE ---
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-  apiKey: "AIzaSyC4HDfispWw3e6c_TIhnvy5JJll-I_p4XM",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "toko-mbg.firebaseapp.com",
   projectId: "toko-mbg",
   storageBucket: "toko-mbg.firebasestorage.app",
@@ -108,7 +107,6 @@ const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__f
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'toko-mbg-default';
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
