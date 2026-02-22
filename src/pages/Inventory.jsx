@@ -106,9 +106,8 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, setAct
                 {/* Filters */}
                 <div className="flex flex-row items-center gap-3 p-4 border-b border-slate-100">
                     <div className="relative w-80 shrink-0">
-                        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
-                            className="input-modern pl-9 w-full"
+                            className="input-modern pl-10 w-full"
                             placeholder="Cari nama barang, SKU, atau barcode..."
                             value={search}
                             onChange={e => handleSearch(e.target.value)}
