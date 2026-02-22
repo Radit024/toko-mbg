@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Truck, Wallet, Trash2, Plus } from 'lucide-react';
+import { Truck, Wallet, Trash2, Plus, Receipt, Calendar, DollarSign } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 
 export default function Expenses({ orders, generalExpenses, handleUpdateOrderExpenses, handleGeneralExpense }) {
@@ -37,88 +37,189 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
         if (!selectedOrderId) return;
         const cleanExpenses = tempExpenses.filter(e => e.name && e.amount);
         const success = await handleUpdateOrderExpenses(selectedOrderId, cleanExpenses);
-        if (success) { alert("Semua biaya berhasil disimpan!"); }
+        if (success) alert('Semua biaya berhasil disimpan!');
     };
 
     const submitGenExp = () => {
+        if (!genTitle || !genAmount) return;
         handleGeneralExpense({ date: genDate, title: genTitle, amount: parseFloat(genAmount) });
         setGenTitle(''); setGenAmount('');
     };
 
+    const totalGenExp = generalExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+
     return (
-        <div className="pb-24 md:pb-0 animate-fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <div><h2 className="text-2xl font-bold text-gray-800">Pusat Biaya & Operasional</h2><p className="text-gray-500 text-sm">Kelola pengeluaran nota dan biaya umum toko</p></div>
-                <div className="flex bg-gray-100 p-1.5 rounded-2xl w-full md:w-auto">
-                    <button onClick={() => setTab('nota')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${tab === 'nota' ? 'bg-white shadow-sm text-pink-600' : 'text-gray-500 hover:text-gray-700'}`}>Biaya per Nota</button>
-                    <button onClick={() => setTab('umum')} className={`flex-1 md:flex-none px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${tab === 'umum' ? 'bg-white shadow-sm text-pink-600' : 'text-gray-500 hover:text-gray-700'}`}>Biaya Umum Toko</button>
+        <div className="pb-24 md:pb-8 animate-fade-in space-y-5">
+
+            {/* Header + Tabs */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 className="text-xl font-black text-slate-800">Pusat Biaya & Operasional</h2>
+                    <p className="text-sm text-slate-400">Kelola pengeluaran nota dan biaya umum toko</p>
+                </div>
+                <div className="flex bg-slate-100 p-1 rounded-xl">
+                    <button onClick={() => setTab('nota')}
+                        className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all
+                          ${tab === 'nota' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        Biaya per Nota
+                    </button>
+                    <button onClick={() => setTab('umum')}
+                        className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all
+                          ${tab === 'umum' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+                        Biaya Umum
+                    </button>
                 </div>
             </div>
 
-            {tab === 'nota' ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-pink-100">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="p-3 bg-orange-100 text-orange-600 rounded-xl"><Truck size={24} /></div>
-                            <h3 className="font-bold text-xl text-gray-800">Input Biaya Nota (Bulk)</h3>
-                        </div>
-                        <p className="text-sm text-gray-500 mb-6 bg-pink-50 p-4 rounded-xl border border-pink-100">Masukkin semua biaya operasional kita gesss (Bensin, Makan, Parkir).</p>
-
-                        <div className="space-y-5">
+            {/* Biaya per Nota */}
+            {tab === 'nota' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="p-2.5 bg-orange-50 text-orange-500 rounded-xl"><Truck size={20} /></div>
                             <div>
-                                <label className="text-xs font-bold text-gray-500 ml-1 mb-1 block">Pilih Nota / Transaksi</label>
-                                <select className="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 focus:ring-2 focus:ring-pink-300 outline-none max-w-full"
-                                    value={selectedOrderId} onChange={e => setSelectedOrderId(e.target.value)}>
-                                    <option value="">-- Cari Nota Terakhir --</option>
+                                <h3 className="font-bold text-slate-800">Input Biaya Nota</h3>
+                                <p className="text-xs text-slate-400">Tambahkan biaya ops ke setiap transaksi</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block flex items-center gap-1.5">
+                                    <Receipt size={12} /> Pilih Nota Transaksi
+                                </label>
+                                <select className="input-modern" value={selectedOrderId} onChange={e => setSelectedOrderId(e.target.value)}>
+                                    <option value="">-- Pilih Nota --</option>
                                     {recentOrders.map(o => (
-                                        <option key={o.id} value={o.id}>{formatDate(o.date)} - {o.customerName || 'No Name'} - {formatCurrency(o.financials.revenue)}</option>
+                                        <option key={o.id} value={o.id}>
+                                            {formatDate(o.date)} — {o.customerName || 'Umum'} — {formatCurrency(o.financials.revenue)}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
 
                             {selectedOrder && (
-                                <div className="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm space-y-2">
-                                    <div className="flex justify-between text-sm"><span className="text-gray-500">Laba Kotor:</span><span className="font-bold text-gray-800">{formatCurrency(selectedOrder.financials.grossProfit)}</span></div>
-                                    <div className="flex justify-between text-sm pt-2 border-t font-bold"><span className="text-gray-500">Net Profit Saat Ini:</span><span className="text-green-600">{formatCurrency(selectedOrder.financials.netProfit)}</span></div>
+                                <div className="grid grid-cols-2 gap-2 animate-scale-in">
+                                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                        <p className="text-[10px] text-slate-400 uppercase font-bold">Laba Kotor</p>
+                                        <p className="font-black text-slate-800">{formatCurrency(selectedOrder.financials.grossProfit)}</p>
+                                    </div>
+                                    <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                                        <p className="text-[10px] text-slate-400 uppercase font-bold">Net Profit</p>
+                                        <p className="font-black text-emerald-600">{formatCurrency(selectedOrder.financials.netProfit)}</p>
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="space-y-3">
-                                <label className="text-xs font-bold text-gray-500 ml-1 block">Daftar Biaya</label>
-                                {tempExpenses.map((exp, idx) => (
-                                    <div key={idx} className="flex gap-2">
-                                        <input className="flex-[2] p-3 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:ring-1 focus:ring-pink-300 w-full" placeholder="Nama Biaya" value={exp.name} onChange={(e) => handleExpChange(idx, 'name', e.target.value)} />
-                                        <input type="number" className="flex-1 p-3 border border-gray-200 rounded-xl bg-white text-sm outline-none focus:ring-1 focus:ring-pink-300 w-24" placeholder="Rp" value={exp.amount} onChange={(e) => handleExpChange(idx, 'amount', e.target.value)} />
-                                        <button onClick={() => removeExpRow(idx)} className="p-3 text-red-500 hover:bg-red-50 rounded-xl"><Trash2 size={16} /></button>
-                                    </div>
-                                ))}
-                                <button onClick={addExpRow} className="text-xs font-bold text-pink-600 hover:text-pink-700 flex items-center gap-1 mt-2"><Plus size={14} /> Tambah Baris Biaya</button>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500 mb-2 block">Daftar Biaya</label>
+                                <div className="space-y-2">
+                                    {tempExpenses.map((exp, idx) => (
+                                        <div key={idx} className="flex gap-2">
+                                            <input
+                                                className="input-modern flex-[2] text-sm"
+                                                placeholder="Nama Biaya (Bensin, Parkir...)"
+                                                value={exp.name}
+                                                onChange={e => handleExpChange(idx, 'name', e.target.value)}
+                                            />
+                                            <input
+                                                type="number"
+                                                className="input-modern flex-1 text-sm"
+                                                placeholder="Rp"
+                                                value={exp.amount}
+                                                onChange={e => handleExpChange(idx, 'amount', e.target.value)}
+                                            />
+                                            <button onClick={() => removeExpRow(idx)}
+                                                className="p-2.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all">
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={addExpRow}
+                                    className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-pink-500 hover:text-pink-700 transition-colors">
+                                    <Plus size={14} /> Tambah Baris
+                                </button>
                             </div>
-                            <button onClick={saveBulkExpenses} disabled={!selectedOrderId} className="w-full py-4 bg-pink-600 text-white rounded-2xl font-bold hover:bg-pink-700 disabled:bg-gray-200 transition-all shadow-lg shadow-pink-200 disabled:shadow-none">Simpan Semua Biaya</button>
+
+                            <button onClick={saveBulkExpenses} disabled={!selectedOrderId}
+                                className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold
+                                  hover:opacity-90 transition-all shadow-lg shadow-pink-200 disabled:opacity-40 disabled:shadow-none">
+                                Simpan Semua Biaya
+                            </button>
                         </div>
                     </div>
                 </div>
-            ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-pink-100 h-fit">
-                        <div className="flex items-center gap-3 mb-6"><div className="p-3 bg-red-100 text-red-600 rounded-xl"><Wallet size={24} /></div><h3 className="font-bold text-xl text-gray-800">Input Biaya Umum</h3></div>
-                        <div className="space-y-5">
-                            <div><label className="text-xs font-bold text-gray-500 ml-1 mb-1 block">Tanggal</label><input type="date" className="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 outline-none focus:ring-2 focus:ring-pink-300" value={genDate} onChange={e => setGenDate(e.target.value)} /></div>
-                            <div><label className="text-xs font-bold text-gray-500 ml-1 mb-1 block">Keperluan</label><input className="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 outline-none focus:ring-2 focus:ring-pink-300" placeholder="Contoh: Listrik, Gaji Karyawan" value={genTitle} onChange={e => setGenTitle(e.target.value)} /></div>
-                            <div><label className="text-xs font-bold text-gray-500 ml-1 mb-1 block">Nominal</label><input type="number" className="w-full p-4 border border-gray-200 rounded-2xl bg-gray-50 outline-none focus:ring-2 focus:ring-pink-300" placeholder="Rp" value={genAmount} onChange={e => setGenAmount(e.target.value)} /></div>
-                            <button onClick={submitGenExp} className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">Simpan Pengeluaran</button>
+            )}
+
+            {/* Biaya Umum */}
+            {tab === 'umum' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
+                    {/* Form */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-fit">
+                        <div className="flex items-center gap-3 mb-5">
+                            <div className="p-2.5 bg-red-50 text-red-500 rounded-xl"><Wallet size={20} /></div>
+                            <div>
+                                <h3 className="font-bold text-slate-800">Input Biaya Umum</h3>
+                                <p className="text-xs text-slate-400">Listrik, gaji, sewa, dll.</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                                    <Calendar size={12} /> Tanggal
+                                </label>
+                                <input type="date" className="input-modern" value={genDate} onChange={e => setGenDate(e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Keperluan</label>
+                                <input className="input-modern" placeholder="Contoh: Listrik Bulanan, Gaji Karyawan" value={genTitle} onChange={e => setGenTitle(e.target.value)} />
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                                    <DollarSign size={12} /> Nominal
+                                </label>
+                                <input type="number" className="input-modern" placeholder="Rp 0" value={genAmount} onChange={e => setGenAmount(e.target.value)} />
+                            </div>
+                            <button onClick={submitGenExp} disabled={!genTitle || !genAmount}
+                                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-semibold transition-all shadow-lg shadow-slate-200 disabled:opacity-40 disabled:shadow-none">
+                                Simpan Pengeluaran
+                            </button>
                         </div>
                     </div>
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-pink-100">
-                        <h3 className="font-bold text-gray-800 mb-6">Riwayat Pengeluaran Umum</h3>
-                        <div className="max-h-[500px] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+
+                    {/* History */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-slate-800">Riwayat Pengeluaran</h3>
+                            <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-1.5">
+                                <p className="text-[10px] text-red-400 font-bold uppercase">Total</p>
+                                <p className="font-black text-red-600 text-sm">{formatCurrency(totalGenExp)}</p>
+                            </div>
+                        </div>
+
+                        <div className="max-h-[420px] overflow-y-auto custom-scrollbar space-y-2.5 pr-1">
                             {generalExpenses.map(ge => (
-                                <div key={ge.id} className="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:shadow-sm transition-all">
-                                    <div><div className="font-bold text-gray-800">{ge.title}</div><div className="text-xs text-gray-400 font-medium">{formatDate(ge.date)}</div></div>
-                                    <div className="text-red-500 font-bold bg-red-50 px-3 py-1 rounded-lg">-{formatCurrency(ge.amount)}</div>
+                                <div key={ge.id}
+                                    className="flex justify-between items-center p-3.5 bg-slate-50 rounded-xl border border-slate-100 hover:bg-white hover:shadow-sm transition-all card-hover">
+                                    <div>
+                                        <p className="font-semibold text-slate-700 text-sm">{ge.title}</p>
+                                        <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                                            <Calendar size={10} /> {formatDate(ge.date)}
+                                        </p>
+                                    </div>
+                                    <span className="font-bold text-red-500 bg-red-50 px-3 py-1 rounded-lg text-sm border border-red-100">
+                                        -{formatCurrency(ge.amount)}
+                                    </span>
                                 </div>
                             ))}
-                            {generalExpenses.length === 0 && <p className="text-center text-gray-400 py-10">Belum ada data</p>}
+                            {generalExpenses.length === 0 && (
+                                <div className="py-12 text-center">
+                                    <Wallet size={32} className="text-slate-200 mx-auto mb-2" />
+                                    <p className="text-sm text-slate-400">Belum ada data</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

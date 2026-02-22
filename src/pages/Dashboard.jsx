@@ -1,153 +1,264 @@
-import React, { useState } from 'react';
-import { Store, TrendingUp, Wallet, Truck, DollarSign, Archive, Layers, HandCoins, BarChart3, FileText, AlertTriangle, Package, Users, User, ArrowRight } from 'lucide-react';
+import React, { useMemo } from 'react';
+import {
+    TrendingUp, TrendingDown, ShoppingBag, FileText,
+    AlertTriangle, Package, ArrowRight, ArrowUpRight,
+    Wallet, HandCoins, Activity, ChevronDown, Star
+} from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import SimpleChart from '../components/ui/SimpleChart';
 
-export default function Dashboard({ user, storeProfile, activeStoreId, stats, orders, setShowStoreModal, setShowProfileEdit, setShowWithdraw, setActiveTab }) {
+export default function Dashboard({
+    user, storeProfile, activeStoreId, stats, orders, inventory,
+    setShowStoreModal, setShowProfileEdit, setShowWithdraw, setActiveTab
+}) {
+    const greeting = () => {
+        const h = new Date().getHours();
+        if (h < 11) return 'Good Morning';
+        if (h < 15) return 'Good Afternoon';
+        if (h < 18) return 'Good Evening';
+        return 'Good Evening';
+    };
+
+    const userName = storeProfile?.ownerName || user?.displayName || user?.email?.split('@')[0] || 'User';
+    const firstName = userName.split(' ')[0];
+
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    // Today vs yesterday stats
+    const todayStats = useMemo(() => {
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+
+        const getDate = (o) => {
+            const ts = o.createdAt || o.date;
+            return ts ? (ts.toDate ? ts.toDate() : new Date(ts)) : new Date();
+        };
+
+        const todayOrders = orders.filter(o => getDate(o) >= today);
+        const yOrders = orders.filter(o => { const d = getDate(o); return d >= yesterday && d < today; });
+
+        const todayRev = todayOrders.reduce((s, o) => s + (o.financials?.revenue || 0), 0);
+        const yRev = yOrders.reduce((s, o) => s + (o.financials?.revenue || 0), 0);
+        const revenueChange = yRev > 0 ? +((todayRev - yRev) / yRev * 100).toFixed(1) : null;
+
+        const avgOrder = todayOrders.length > 0 ? todayRev / todayOrders.length : 0;
+        const yAvg = yOrders.length > 0 ? yOrders.reduce((s, o) => s + (o.financials?.revenue || 0), 0) / yOrders.length : 0;
+        const avgChange = yAvg > 0 ? +((avgOrder - yAvg) / yAvg * 100).toFixed(1) : null;
+
+        const ordersChange = yOrders.length > 0 ? +((todayOrders.length - yOrders.length) / yOrders.length * 100).toFixed(1) : null;
+
+        return { todayRev, revenueChange, count: todayOrders.length, ordersChange, avgOrder, avgChange };
+    }, [orders]);
+
+    // Low stock items
+    const lowStockItems = useMemo(() =>
+        (inventory || []).filter(i => i.stock <= (i.minStock || 5) || i.stock <= 0)
+            .sort((a, b) => a.stock - b.stock)
+            .slice(0, 4),
+        [inventory]
+    );
+
+    // Recent activity (from orders)
+    const recentActivity = orders.slice(0, 6);
+
+    const TrendBadge = ({ change }) => {
+        if (change === null || change === undefined) return <span className="text-xs text-slate-400">— no data</span>;
+        const up = change >= 0;
+        return (
+            <span className={`flex items-center gap-0.5 text-xs font-semibold ${up ? 'text-emerald-600' : 'text-red-500'}`}>
+                {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {up ? '+' : ''}{change}% <span className="text-slate-400 font-normal">vs yesterday</span>
+            </span>
+        );
+    };
+
     return (
-        <div className="space-y-8 pb-24 md:pb-0 animate-fade-in">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="flex flex-col gap-2">
-                    <h2 className="text-3xl font-extrabold text-gray-800 tracking-tight">Halo, {storeProfile?.ownerName || user?.displayName || user?.email?.split('@')[0]}! 👋</h2>
-                    <div className="text-gray-500 text-sm font-medium flex gap-2 items-center">
-                        <Store size={14}/> {storeProfile?.storeName || 'Toko Saya'}
-                        {activeStoreId !== user?.uid && <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">MODE KARYAWAN</span>}
-                    </div>
+        <div className="space-y-6 pb-24 md:pb-8 animate-fade-in">
+
+            {/* Greeting */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                <div>
+                    <h1 className="text-2xl font-black text-slate-800 leading-tight">
+                        {greeting()}, {firstName}! 👋
+                    </h1>
+                    <p className="text-sm text-slate-400 mt-0.5">Here's what's happening with your store today.</p>
                 </div>
-                
-                <div className="flex gap-2">
-                    <button onClick={() => setShowStoreModal(true)} className="flex items-center gap-2 px-4 py-2 bg-white border border-pink-200 text-pink-600 rounded-xl font-bold text-sm hover:bg-pink-50 transition-all shadow-sm">
-                        <Users size={18}/> {activeStoreId === user?.uid ? "Tim" : "Ganti Toko"}
-                    </button>
-                    <button onClick={() => setShowProfileEdit(true)} className="relative group">
-                        <div className="w-10 h-10 rounded-full bg-pink-100 border-2 border-pink-200 overflow-hidden flex items-center justify-center">
-                            {storeProfile?.photoURL ? <img src={storeProfile.photoURL} alt="profile" className="w-full h-full object-cover"/> : <User size={24} className="text-pink-400"/>}
+                <div className="flex items-center gap-1.5 text-sm text-slate-500 font-medium bg-white border border-slate-100 rounded-xl px-3 py-2 shadow-sm">
+                    <FileText size={14} className="text-slate-400" />
+                    {dateStr}
+                </div>
+            </div>
+
+            {/* 4 Stat Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+                {/* Today's Revenue */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                    <div className="flex items-start justify-between mb-3">
+                        <p className="text-sm text-slate-500 font-medium">Today's Revenue</p>
+                        <div className="p-2 bg-blue-50 rounded-xl"><Wallet size={16} className="text-blue-500" /></div>
+                    </div>
+                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">
+                        {formatCurrency(todayStats.todayRev)}
+                    </p>
+                    <TrendBadge change={todayStats.revenueChange} />
+                </div>
+
+                {/* Total Orders */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                    <div className="flex items-start justify-between mb-3">
+                        <p className="text-sm text-slate-500 font-medium">Total Orders</p>
+                        <div className="p-2 bg-pink-50 rounded-xl"><ShoppingBag size={16} className="text-pink-500" /></div>
+                    </div>
+                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">{todayStats.count}</p>
+                    <TrendBadge change={todayStats.ordersChange} />
+                </div>
+
+                {/* Avg Order Value */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                    <div className="flex items-start justify-between mb-3">
+                        <p className="text-sm text-slate-500 font-medium">Avg. Order Value</p>
+                        <div className="p-2 bg-amber-50 rounded-xl"><FileText size={16} className="text-amber-500" /></div>
+                    </div>
+                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">
+                        {formatCurrency(todayStats.avgOrder)}
+                    </p>
+                    <TrendBadge change={todayStats.avgChange} />
+                </div>
+
+                {/* Low Stock Alert count */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                    <div className="flex items-start justify-between mb-3">
+                        <p className="text-sm text-slate-500 font-medium">Low Stock Items</p>
+                        <div className="p-2 bg-red-50 rounded-xl"><Package size={16} className="text-red-500" /></div>
+                    </div>
+                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">
+                        {stats.outStock + stats.lowStock}
+                    </p>
+                    <span className="text-xs text-slate-400">
+                        <span className="text-red-500 font-semibold">{stats.outStock}</span> habis ·{' '}
+                        <span className="text-amber-500 font-semibold">{stats.lowStock}</span> menipis
+                    </span>
+                </div>
+            </div>
+
+            {/* Chart + Low Stock Alert */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+                {/* Weekly Revenue Chart */}
+                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                    <div className="flex items-start justify-between mb-1">
+                        <div>
+                            <h3 className="font-bold text-slate-800">Weekly Revenue</h3>
+                            <p className="text-xs text-slate-400 mt-0.5">Comparing to last week</p>
                         </div>
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    </button>
-                </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                <div className="bg-gradient-to-br from-pink-500 to-rose-500 p-6 rounded-3xl shadow-lg shadow-pink-200 text-white relative overflow-hidden group hover:scale-[1.02] hover:shadow-xl transition-all duration-300">
-                    <div className="absolute top-0 right-0 p-4 opacity-10"><TrendingUp size={80}/></div>
-                    <div className="text-pink-100 font-medium text-sm uppercase tracking-wider mb-2">Total Omzet</div>
-                    <h3 className="text-3xl font-bold">{formatCurrency(stats.salesRevenue)}</h3>
-                    <p className="text-pink-100 text-xs mt-2 opacity-80">Pendapatan Kotor</p>
-                </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-pink-100 hover:shadow-lg transition-all group hover:scale-[1.02] duration-300">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-pink-50 text-pink-600 rounded-2xl"><Wallet size={24}/></div>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 px-2 py-1 rounded-lg">Profit</span>
+                        <button className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                            Last 7 Days <ChevronDown size={13} />
+                        </button>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800">{formatCurrency(stats.salesGrossProfit)}</h3>
-                    <p className="text-xs text-gray-400 mt-1">Laba Kotor (Jual - Modal)</p>
-                </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-pink-100 hover:shadow-lg transition-all group hover:scale-[1.02] duration-300">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-orange-50 text-orange-600 rounded-2xl"><Truck size={24}/></div>
-                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50 px-2 py-1 rounded-lg">Expenses</span>
+                    <div className="mt-4">
+                        <SimpleChart data={orders} />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800">{formatCurrency(stats.orderExpenses + stats.generalExpTotal)}</h3>
-                    <p className="text-xs text-gray-400 mt-1">Total Pengeluaran & Ops</p>
                 </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 hover:shadow-lg transition-all group hover:scale-[1.02] duration-300">
-                    <div className="flex justify-between items-start mb-4">
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><DollarSign size={24}/></div>
-                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Net Profit</span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-emerald-600">{formatCurrency(stats.netProfitGlobal)}</h3>
-                    <p className="text-xs text-gray-400 mt-1">Laba Bersih Toko</p>
-                </div>
-            </div>
 
-            <h3 className="text-lg font-bold text-gray-800 mt-2">Info Modal & Stok</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 hover:shadow-lg transition-all group">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><Archive size={24}/></div>
-                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">ASET GUDANG</span>
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-800">{formatCurrency(stats.totalAssetValue)}</h3>
-                    <p className="text-sm text-gray-500 mt-2">Nilai uang barang yang <b>belum terjual</b>.</p>
-                </div>
-                <div className="bg-white p-6 rounded-3xl shadow-sm border border-blue-100 hover:shadow-lg transition-all group">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl"><Layers size={24}/></div>
-                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">MODAL TERJUAL (HPP)</span>
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-800">{formatCurrency(stats.totalCOGS)}</h3>
-                    <p className="text-sm text-gray-500 mt-2">Total modal yang sudah <b>kembali</b>.</p>
-                </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-6 rounded-3xl shadow-xl text-white relative overflow-hidden group hover:scale-[1.01] transition-all duration-300">
-                <div className="absolute top-0 right-0 p-8 opacity-10"><Wallet size={120}/></div>
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1 text-gray-300">
-                            <Wallet size={18}/> <span className="text-xs font-bold uppercase tracking-wider">Dompet Toko (Saldo Real)</span>
+                {/* Low Stock Alert */}
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle size={16} className="text-amber-500" />
+                            <h3 className="font-bold text-slate-800">Low Stock Alert</h3>
                         </div>
-                        <h1 className="text-4xl font-extrabold text-white mb-2 tracking-tight">{formatCurrency(stats.cashOnHand)}</h1>
-                        <div className="flex gap-4 text-xs text-gray-400 flex-wrap">
-                            <span>Omzet Lunas: <span className="text-white">{formatCurrency(stats.salesRevenue)}</span></span>
-                            <span>Expenses: <span className="text-white">-{formatCurrency(stats.orderExpenses + stats.generalExpTotal)}</span></span>
-                            <span>Ditarik: <span className="text-orange-300">-{formatCurrency(stats.totalWithdrawals)}</span></span>
-                        </div>
+                        <button onClick={() => setActiveTab('inventory')}
+                            className="text-xs font-semibold text-pink-500 hover:text-pink-700 flex items-center gap-1">
+                            View All <ArrowRight size={11} />
+                        </button>
                     </div>
-                    <button onClick={() => setShowWithdraw(true)} className="px-6 py-3 bg-white text-gray-900 rounded-xl font-bold hover:bg-gray-100 shadow-lg flex items-center gap-2">
-                        <HandCoins size={18}/> Ambil Uang / Modal
-                    </button>
-                </div>
-            </div>
 
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-pink-50 mt-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 size={20} className="text-pink-600"/>
-                    <h3 className="font-bold text-lg text-gray-800">Tren Penjualan (7 Hari Terakhir)</h3>
-                </div>
-                <SimpleChart data={orders} />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-pink-50 hover:shadow-md transition-shadow">
-                    <div className="p-6 border-b border-pink-50 flex justify-between items-center">
-                        <h3 className="font-bold text-lg text-gray-800">Transaksi Terakhir</h3>
-                        <button onClick={()=>setActiveTab('history')} className="text-sm font-bold text-pink-600 hover:underline flex items-center gap-1">Lihat Semua <ArrowRight size={14}/></button>
-                    </div>
-                    <div className="divide-y divide-gray-50">
-                        {orders.slice(0, 5).map(o => (
-                            <div key={o.id} className="p-4 hover:bg-pink-50/30 transition-colors flex justify-between items-center">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-10 h-10 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
-                                        <FileText size={18}/>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-gray-800 text-sm">{o.customerName || 'Pelanggan Umum'}</p>
-                                        <p className="text-xs text-gray-400">{formatDate(o.date)} &bull; {o.items.length} Barang</p>
-                                    </div>
+                    <div className="space-y-3">
+                        {lowStockItems.length > 0 ? lowStockItems.map(item => (
+                            <div key={item.id} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-slate-700 text-sm truncate">{item.name}</p>
+                                    <p className="text-[11px] text-slate-400">{item.category || item.unit || '—'}</p>
                                 </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-gray-800">{formatCurrency(o.financials.revenue)}</p>
-                                    <p className="text-xs text-emerald-500 font-medium">+{formatCurrency(o.financials.netProfit)}</p>
+                                <div className="flex items-center gap-2 shrink-0 ml-2">
+                                    <span className={`text-xs font-bold ${item.stock <= 0 ? 'text-red-600' : 'text-amber-600'}`}>
+                                        {item.stock} Left
+                                    </span>
+                                    <button onClick={() => setActiveTab('purchases')}
+                                        className="text-[10px] font-bold text-blue-600 hover:text-blue-800 border border-blue-200 hover:border-blue-400 bg-blue-50 hover:bg-blue-100 rounded-lg px-2 py-1 transition-all whitespace-nowrap">
+                                        Reorder
+                                    </button>
                                 </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div className="py-6 text-center">
+                                <Package size={28} className="text-slate-200 mx-auto mb-2" />
+                                <p className="text-sm text-slate-400">Stok aman semua!</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Recent Activity + Pro Tip */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+                {/* Recent Activity */}
+                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+                        <h3 className="font-bold text-slate-800">Recent Activity</h3>
+                        <button onClick={() => setActiveTab('history')}
+                            className="text-xs font-semibold text-pink-500 hover:text-pink-700 flex items-center gap-1">
+                            Lihat Semua <ArrowRight size={11} />
+                        </button>
+                    </div>
+                    <div className="divide-y divide-slate-50">
+                        {recentActivity.map((o, i) => {
+                            const isNew = i === 0;
+                            return (
+                                <div key={o.id}
+                                    className={`flex items-start justify-between px-5 py-3.5 hover:bg-slate-50/60 transition-colors animate-fade-in stagger-${Math.min(i + 1, 4)}`}>
+                                    <div className="flex items-start gap-3">
+                                        <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${isNew ? 'bg-emerald-400' : 'bg-blue-400'}`} />
+                                        <div>
+                                            <p className="font-semibold text-slate-700 text-sm">
+                                                Order #{o.id.slice(-4).toUpperCase()} {o.paymentStatus === 'Lunas' ? 'Completed' : 'Pending'}
+                                            </p>
+                                            <p className="text-xs text-slate-400">
+                                                {o.cashierName ? `Processed by ${o.cashierName.split('@')[0]}` : `${o.items?.length || 0} item(s)`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right shrink-0 ml-3">
+                                        <p className="font-bold text-slate-800 text-sm">{formatCurrency(o.financials?.revenue || 0)}</p>
+                                        <p className="text-[11px] text-slate-400">{formatDate(o.createdAt || o.date)}</p>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {recentActivity.length === 0 && (
+                            <div className="py-12 text-center">
+                                <Activity size={28} className="text-slate-200 mx-auto mb-2" />
+                                <p className="text-sm text-slate-400">Belum ada aktivitas</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-sm border border-pink-50 p-6 hover:shadow-md transition-shadow">
-                    <h3 className="font-bold text-lg text-gray-800 mb-4">Status Gudang</h3>
-                    <div className="space-y-4">
-                        <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex items-center justify-between">
-                            <div className="flex items-center gap-3"><AlertTriangle className="text-red-500" size={20}/><span className="text-sm font-medium text-red-700">Stok Habis</span></div>
-                            <span className="font-bold text-xl text-red-700">{stats.outStock}</span>
+                {/* Pro Tip */}
+                <div className="flex flex-col gap-4">
+                    {/* Cash on Hand widget */}
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Kas Toko</p>
+                            <Wallet size={14} className="text-pink-400" />
                         </div>
-                        <div className="p-4 bg-yellow-50 rounded-2xl border border-yellow-100 flex items-center justify-between">
-                            <div className="flex items-center gap-3"><Package className="text-yellow-600" size={20}/><span className="text-sm font-medium text-yellow-700">Stok Menipis</span></div>
-                            <span className="font-bold text-xl text-yellow-700">{stats.lowStock}</span>
-                        </div>
-                        <button onClick={()=>setActiveTab('inventory')} className="w-full py-3 mt-2 bg-gray-900 text-white rounded-xl font-bold text-sm hover:bg-gray-800">Cek Gudang</button>
+                        <p className="text-xl font-black text-slate-800">{formatCurrency(stats.cashOnHand)}</p>
+                        <button onClick={() => setShowWithdraw(true)}
+                            className="mt-3 w-full py-2 bg-slate-900 hover:bg-pink-600 text-white rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-2">
+                            <HandCoins size={13} /> Ambil / Setor
+                        </button>
                     </div>
                 </div>
             </div>

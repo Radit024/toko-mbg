@@ -4,11 +4,11 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: "toko-mbg.firebaseapp.com",
-    projectId: "toko-mbg",
-    storageBucket: "toko-mbg.firebasestorage.app",
-    messagingSenderId: "298104850594",
-    appId: "1:298104850594:web:17a719e5ab1386fa32effb",
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -18,4 +18,4 @@ export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 // Export appId biar bisa dipakai di tempat lain
-export const appId = 'toko-mbg-default'; 
+export const appId = import.meta.env.VITE_FIREBASE_PROJECT_ID;

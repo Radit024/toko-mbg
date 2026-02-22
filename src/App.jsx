@@ -490,6 +490,8 @@ export default function App() {
                 setIsSidebarOpenState={setIsSidebarOpen}
                 handleLogout={handleLogout}
                 navItems={navItems}
+                user={user}
+                storeProfile={storeProfile}
             />
 
             {isSidebarOpen && <div className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />}
@@ -505,7 +507,8 @@ export default function App() {
                     {activeTab === 'dashboard' && (
                         <Dashboard
                             user={user} storeProfile={storeProfile} activeStoreId={activeStoreId}
-                            stats={stats} orders={orders} setShowStoreModal={setShowStoreModal}
+                            stats={stats} orders={orders} inventory={inventory}
+                            setShowStoreModal={setShowStoreModal}
                             setShowProfileEdit={setShowProfileEdit} setShowWithdraw={setShowWithdraw}
                             setActiveTab={setActiveTab}
                         />
@@ -534,6 +537,7 @@ export default function App() {
                         <Inventory
                             inventory={inventory}
                             handleDeleteInventoryItem={handleDeleteInventoryItem}
+                            setActiveTab={setActiveTab}
                         />
                     )}
                     {activeTab === 'purchases' && (
