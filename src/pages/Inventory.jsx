@@ -104,8 +104,8 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, setAct
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
 
                 {/* Filters */}
-                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 p-4 border-b border-slate-50">
-                    <div className="relative flex-1 max-w-xs">
+                <div className="flex flex-row items-center gap-3 p-4 border-b border-slate-100">
+                    <div className="relative w-80 shrink-0">
                         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input
                             className="input-modern pl-9 w-full"
@@ -114,12 +114,12 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, setAct
                             onChange={e => handleSearch(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <select className="input-modern text-sm px-3" value={categoryFilter} onChange={e => handleCategory(e.target.value)}>
+                    <div className="flex items-center gap-2 ml-auto shrink-0">
+                        <select className="input-modern text-sm px-3 min-w-[155px]" value={categoryFilter} onChange={e => handleCategory(e.target.value)}>
                             <option value="">Semua Kategori</option>
                             {categories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
-                        <select className="input-modern text-sm px-3" value={statusFilter} onChange={e => handleStatus(e.target.value)}>
+                        <select className="input-modern text-sm px-3 min-w-[130px]" value={statusFilter} onChange={e => handleStatus(e.target.value)}>
                             <option value="">Status Stok</option>
                             <option value="tersedia">Tersedia</option>
                             <option value="tipis">Stok Menipis</option>
