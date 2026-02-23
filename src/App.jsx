@@ -119,7 +119,7 @@ export default function App() {
             )}
 
             {/* MAIN CONTENT */}
-            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${isSidebarMini ? 'md:ml-20' : 'md:ml-80'}`}>
+            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${isSidebarMini ? 'md:ml-20' : 'md:ml-64'}`}>
 
                 {/* MOBILE TOP BAR */}
                 <div className="md:hidden sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-pink-50 px-6 py-4 flex justify-between items-center print:hidden shadow-sm">
