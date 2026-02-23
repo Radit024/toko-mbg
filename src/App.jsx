@@ -113,6 +113,7 @@ export default function App() {
                         <Inventory
                             inventory={data.inventory}
                             handleDeleteInventoryItem={data.handleDeleteInventoryItem}
+                            handlePurchase={data.handlePurchase}
                             setActiveTab={ui.setActiveTab}
                         />
                     )}

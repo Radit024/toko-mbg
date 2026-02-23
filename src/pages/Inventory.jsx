@@ -1,4 +1,5 @@
 ﻿import React, { useState, useMemo } from 'react';
+import RestockModal from '../components/modals/RestockModal';
 import {
     Search, Trash2, Package, AlertTriangle, Tag, TrendingUp,
     BarChart2, Pencil, Upload, Plus, ChevronLeft, ChevronRight,
@@ -8,11 +9,12 @@ import { formatCurrency } from '../utils/helpers';
 
 const PAGE_SIZE = 5;
 
-export default function Inventory({ inventory, handleDeleteInventoryItem, setActiveTab }) {
+export default function Inventory({ inventory, handleDeleteInventoryItem, handlePurchase, setActiveTab }) {
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [page, setPage] = useState(1);
+    const [showRestockModal, setShowRestockModal] = useState(false);
 
     const categories = useMemo(() =>
         [...new Set(inventory.map(i => i.category).filter(Boolean))].sort(),
@@ -75,7 +77,7 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, setAct
                         <Upload size={15} /> Import / Export
                     </button>
                     <button
-                        onClick={() => setActiveTab && setActiveTab('purchases')}
+                        onClick={() => setShowRestockModal(true)}
                         className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-md shadow-pink-200">
                         <Plus size={16} /> Tambah Produk
                     </button>
@@ -287,6 +289,14 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, setAct
             </div>
 
             <p className="text-center text-xs text-slate-300 pb-2"> 2024 Toko MBG. All rights reserved.</p>
+
+            {showRestockModal && (
+                <RestockModal
+                    inventory={inventory}
+                    handlePurchase={handlePurchase}
+                    onClose={() => setShowRestockModal(false)}
+                />
+            )}
         </div>
     );
 }

@@ -249,6 +249,37 @@ export function useAppData() {
         } catch (e) { alert("Gagal: " + e.message); }
     };
 
+    const handleSaveInventoryItem = async (data) => {
+        if (!db || !activeStoreId) return alert("Koneksi database belum siap.");
+        const { id, name, category, unit, sellPrice, avgCost, stock, barcode, minStock } = data;
+        if (!name?.trim()) return alert("Nama produk wajib diisi.");
+        const payload = {
+            name: name.trim(),
+            category: category || 'Umum',
+            unit: unit || 'pcs',
+            sellPrice: parseFloat(sellPrice) || 0,
+            avgCost: parseFloat(avgCost) || 0,
+            lastPrice: parseFloat(avgCost) || 0,
+            barcode: barcode || '',
+            minStock: parseFloat(minStock) || 5,
+        };
+        try {
+            if (id) {
+                await updateDoc(getStoreDoc("inventory", id), {
+                    ...payload,
+                    stock: parseFloat(stock) || 0,
+                });
+            } else {
+                await addDoc(getStoreCollection("inventory"), {
+                    ...payload,
+                    stock: parseFloat(stock) || 0,
+                    lastSupplier: '',
+                });
+            }
+            return true;
+        } catch (e) { alert("Gagal: " + e.message); return false; }
+    };
+
     const handleDeleteInventoryItem = async (item) => {
         if (!window.confirm(`PERINGATAN 1/2: Hapus "${item.name}"?`)) return;
         if (!window.confirm(`PERINGATAN 2/2: Hapus Permanen?`)) return;
@@ -430,6 +461,7 @@ export function useAppData() {
         handlePurchase,
         handleUpdateRestock,
         handleDeleteRestock,
+        handleSaveInventoryItem,
         handleDeleteInventoryItem,
         handleSaveOrder,
         handleFullUpdateOrder,
