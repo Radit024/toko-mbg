@@ -48,7 +48,7 @@ export default function App() {
     if (!data.user) return <Login />;
 
     return (
-        <div className="flex min-h-screen bg-[#FDF2F8] font-sans text-slate-800">
+        <div className="flex h-screen overflow-hidden bg-[#FDF2F8] font-sans text-slate-800">
 
             <Sidebar
                 isSidebarOpen={ui.isSidebarOpen}
@@ -70,7 +70,7 @@ export default function App() {
                 />
             )}
 
-            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${ui.isSidebarMini ? 'md:ml-20 landscape:ml-20' : 'md:ml-64 landscape:ml-64'}`}>
+            <main className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 print:ml-0 print:w-full print:p-0 ${ui.isSidebarMini ? 'md:ml-20 landscape:ml-20' : 'md:ml-64 landscape:ml-64'}`}>
 
                 <MobileTopBar
                     user={data.user}
@@ -78,68 +78,72 @@ export default function App() {
                     handleLogout={() => data.handleLogout(ui.setActiveTab)}
                 />
 
-                <div className="p-4 md:p-10 max-w-7xl mx-auto">
-                    {ui.activeTab === 'dashboard' && (
-                        <Dashboard
-                            user={data.user}
-                            storeProfile={data.storeProfile}
-                            activeStoreId={data.activeStoreId}
-                            stats={data.stats}
-                            orders={data.orders}
-                            inventory={data.inventory}
-                            setShowStoreModal={data.setShowStoreModal}
-                            setShowProfileEdit={data.setShowProfileEdit}
-                            setShowWithdraw={data.setShowWithdraw}
-                            setActiveTab={ui.setActiveTab}
-                        />
-                    )}
-                    {ui.activeTab === 'sales' && (
+                {/* Sales: full-height no-scroll wrapper. Other pages: padded scrollable. */}
+                {ui.activeTab === 'sales' ? (
+                    <div className="flex-1 overflow-hidden p-2 sm:p-3 md:p-6 lg:p-10">
                         <Sales
                             inventory={data.inventory}
                             handleSaveOrder={data.handleSaveOrder}
                         />
-                    )}
-                    {ui.activeTab === 'expenses' && (
-                        <Expenses
-                            orders={data.orders}
-                            generalExpenses={data.generalExpenses}
-                            handleUpdateOrderExpenses={data.handleUpdateOrderExpenses}
-                            handleGeneralExpense={data.handleGeneralExpense}
-                        />
-                    )}
-                    {ui.activeTab === 'history' && (
-                        <History
-                            orders={data.orders}
-                            setEditingOrder={ui.setEditingOrder}
-                            handleDeleteOrder={data.handleDeleteOrder}
-                            handlePrint={ui.handlePrint}
-                            handleQuickPay={data.handleQuickPay}
-                        />
-                    )}
-                    {ui.activeTab === 'inventory' && (
-                        <Inventory
-                            inventory={data.inventory}
-                            handleDeleteInventoryItem={data.handleDeleteInventoryItem}
-                            handlePurchase={data.handlePurchase}
-                            setActiveTab={ui.setActiveTab}
-                        />
-                    )}
-                    {ui.activeTab === 'purchases' && (
-                        <Purchases
-                            inventory={data.inventory}
-                            restockLogs={data.restockLogs}
-                            handlePurchase={data.handlePurchase}
-                            setEditingRestock={ui.setEditingRestock}
-                            handleDeleteRestock={data.handleDeleteRestock}
-                        />
-                    )}
-                    {ui.activeTab === 'reports' && (
-                        <Reports
-                            orders={data.orders}
-                            inventory={data.inventory}
-                        />
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <div className="flex-1 overflow-y-auto p-3 md:p-6 max-w-7xl mx-auto w-full">
+                        {ui.activeTab === 'dashboard' && (
+                            <Dashboard
+                                user={data.user}
+                                storeProfile={data.storeProfile}
+                                activeStoreId={data.activeStoreId}
+                                stats={data.stats}
+                                orders={data.orders}
+                                inventory={data.inventory}
+                                setShowStoreModal={data.setShowStoreModal}
+                                setShowProfileEdit={data.setShowProfileEdit}
+                                setShowWithdraw={data.setShowWithdraw}
+                                setActiveTab={ui.setActiveTab}
+                            />
+                        )}
+                        {ui.activeTab === 'expenses' && (
+                            <Expenses
+                                orders={data.orders}
+                                generalExpenses={data.generalExpenses}
+                                handleUpdateOrderExpenses={data.handleUpdateOrderExpenses}
+                                handleGeneralExpense={data.handleGeneralExpense}
+                            />
+                        )}
+                        {ui.activeTab === 'history' && (
+                            <History
+                                orders={data.orders}
+                                setEditingOrder={ui.setEditingOrder}
+                                handleDeleteOrder={data.handleDeleteOrder}
+                                handlePrint={ui.handlePrint}
+                                handleQuickPay={data.handleQuickPay}
+                            />
+                        )}
+                        {ui.activeTab === 'inventory' && (
+                            <Inventory
+                                inventory={data.inventory}
+                                handleDeleteInventoryItem={data.handleDeleteInventoryItem}
+                                handlePurchase={data.handlePurchase}
+                                setActiveTab={ui.setActiveTab}
+                            />
+                        )}
+                        {ui.activeTab === 'purchases' && (
+                            <Purchases
+                                inventory={data.inventory}
+                                restockLogs={data.restockLogs}
+                                handlePurchase={data.handlePurchase}
+                                setEditingRestock={ui.setEditingRestock}
+                                handleDeleteRestock={data.handleDeleteRestock}
+                            />
+                        )}
+                        {ui.activeTab === 'reports' && (
+                            <Reports
+                                orders={data.orders}
+                                inventory={data.inventory}
+                            />
+                        )}
+                    </div>
+                )}
 
                 {ui.printOrder && <ReceiptTemplate order={ui.printOrder} />}
             </main>

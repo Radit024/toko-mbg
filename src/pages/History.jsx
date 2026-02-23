@@ -48,7 +48,7 @@ export default function History({ orders, setEditingOrder, handleDeleteOrder, ha
     };
 
     return (
-        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-5">
+        <div className="pb-24 md:pb-6 landscape:pb-6 animate-fade-in space-y-4">
 
             {/* Header */}
             <div className="flex flex-col gap-4">

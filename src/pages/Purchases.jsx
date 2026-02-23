@@ -89,7 +89,7 @@ export default function Purchases({ inventory, restockLogs, handlePurchase, setE
     const visibleLogs = filteredLogs.slice(0, visibleLimit);
 
     return (
-        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-6">
+        <div className="pb-24 md:pb-6 landscape:pb-6 animate-fade-in space-y-4">
 
             {/* Header */}
             <div className="flex items-center justify-between">
@@ -104,9 +104,9 @@ export default function Purchases({ inventory, restockLogs, handlePurchase, setE
             </div>
 
             {/* Form Card */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 md:p-6">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 md:p-5">
                 {/* Mode Toggle */}
-                <div className="flex bg-slate-100 p-1 rounded-xl mb-5 max-w-xs">
+                <div className="flex bg-slate-100 p-1 rounded-xl mb-4 max-w-xs">
                     <button onClick={() => { setMode('existing'); setForm({ ...form, existingId: null }); }}
                         className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all
                           ${mode === 'existing' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>
@@ -198,8 +198,8 @@ export default function Purchases({ inventory, restockLogs, handlePurchase, setE
                     </div>
 
                     <button type="submit"
-                        className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200 active:scale-95">
-                        <PackagePlus size={20} /> Simpan Stok
+                        className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200 active:scale-95">
+                        <PackagePlus size={18} /> Simpan Stok
                     </button>
                 </form>
             </div>

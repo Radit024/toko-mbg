@@ -36,7 +36,10 @@ export default function Sales({ inventory, handleSaveOrder }) {
     const barcodeInputRef = useRef(null);
     const [barcodeBuffer, setBarcodeBuffer] = useState('');
 
-    const categories = ['Semua', ...new Set(inventory.map(i => i.category || 'Umum'))];
+    const PRESET_CATEGORIES = ['Makanan', 'Umum', 'Minuman', 'Sembako', 'Rokok'];
+    const inventoryCategories = [...new Set(inventory.map(i => i.category || 'Umum'))];
+    const extraCategories = inventoryCategories.filter(c => !PRESET_CATEGORIES.includes(c));
+    const categories = ['Semua', ...PRESET_CATEGORIES, ...extraCategories];
 
     const filteredInventory = inventory.filter(i => {
         const matchCat = activeCategory === 'Semua' || (i.category || 'Umum') === activeCategory;
@@ -279,32 +282,32 @@ export default function Sales({ inventory, handleSaveOrder }) {
 
     return (
         <>
-            <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] landscape:h-[calc(100vh-6rem)] gap-4 animate-fade-in">
+            <div className="flex h-full gap-4 animate-fade-in">
 
                 {/* Left - Product Browser */}
                 <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden min-w-0">
 
                     {/* Top Bar */}
-                    <div className="px-4 py-3 flex items-center gap-3 border-b border-slate-100">
+                    <div className="px-3 py-2.5 flex items-center gap-2 border-b border-slate-100">
                         <div className="relative flex-1">
-                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                             <input
-                                className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:border-pink-300 transition-colors"
-                                placeholder="Cari nama produk atau SKU..."
+                                className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:border-pink-300 transition-colors"
+                                placeholder="Cari produk..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                             />
                         </div>
                         <button
                             onClick={() => setBarcodeMode(!barcodeMode)}
-                            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all
                               ${barcodeMode ? 'bg-violet-600 text-white' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
                         >
-                            <Scan size={14} /> <span className="hidden sm:inline">Scan Barcode</span><span className="sm:hidden">Scan</span>
+                            <Scan size={14} /> <span className="hidden sm:inline">Scan</span>
                         </button>
                         <button
                             onClick={() => setShowCamera(true)}
-                            className="flex items-center gap-2 px-3 py-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-semibold transition-all"
+                            className="hidden sm:flex items-center gap-2 px-3 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl text-xs font-semibold transition-all"
                         >
                             <Camera size={14} />
                         </button>
@@ -337,55 +340,56 @@ export default function Sales({ inventory, handleSaveOrder }) {
                     )}
 
                     {/* Category Tabs */}
-                    <div className="px-4 py-2.5 flex gap-2 overflow-x-auto border-b border-slate-100 custom-scrollbar">
+                    <div className="px-3 py-2 flex gap-1.5 overflow-x-auto border-b border-slate-100 custom-scrollbar shrink-0">
                         {categories.map(cat => {
                             const isActive = activeCategory === cat;
+                            const icon = CATEGORY_ICONS_MAP[cat];
                             return (
                                 <button
                                     key={cat}
                                     onClick={() => setActiveCategory(cat)}
-                                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all
+                                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all
                                       ${isActive
                                         ? 'bg-pink-500 text-white shadow-sm shadow-pink-200'
                                         : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                                 >
-                                    {cat}
+                                    {icon && <span className="text-[11px]">{icon}</span>}{cat}
                                 </button>
                             );
                         })}
                     </div>
 
                     {/* Product Grid */}
-                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
                         {filteredInventory.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-48 text-slate-300">
                                 <ShoppingBag size={36} className="mb-2" />
                                 <p className="text-sm">Tidak ada produk</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3">
                                 {filteredInventory.map(item => (
                                     <button
                                         key={item.id}
                                         onClick={() => addToCart(item)}
                                         disabled={item.stock <= 0}
-                                        className="bg-white rounded-2xl border border-slate-100 overflow-hidden text-left hover:border-pink-200 hover:shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-white rounded-xl border border-slate-100 overflow-hidden text-left hover:border-pink-200 hover:shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <div className="relative">
                                             {item.imageUrl ? (
-                                                <img src={item.imageUrl} alt={item.name} className="w-full h-28 object-cover" />
+                                                <img src={item.imageUrl} alt={item.name} className="w-full h-20 sm:h-28 object-cover" />
                                             ) : (
-                                                <div className="w-full h-28 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                                                    <ShoppingBag size={26} className="text-slate-300" />
+                                                <div className="w-full h-20 sm:h-28 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                                                    <ShoppingBag size={22} className="text-slate-300" />
                                                 </div>
                                             )}
-                                            <span className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 shadow-sm">
-                                                Stok: {item.stock}
+                                            <span className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-sm text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded-full border border-slate-200 shadow-sm">
+                                                {item.stock}
                                             </span>
                                         </div>
-                                        <div className="p-2.5">
-                                            <p className="text-xs font-semibold text-slate-700 leading-tight line-clamp-2 mb-1 min-h-[2rem]">{item.name}</p>
-                                            <p className="text-sm font-bold text-pink-600">
+                                        <div className="p-2">
+                                            <p className="text-[11px] font-semibold text-slate-700 leading-tight line-clamp-2 mb-1 min-h-[1.6rem]">{item.name}</p>
+                                            <p className="text-xs font-bold text-pink-600">
                                                 {formatCurrency(item.sellPrice || item.lastPrice || item.avgCost || 0)}
                                             </p>
                                         </div>
@@ -406,15 +410,15 @@ export default function Sales({ inventory, handleSaveOrder }) {
             {cart.length > 0 && (
                 <button
                     onClick={() => setShowCartModal(true)}
-                    className="fixed bottom-24 right-4 z-40 lg:hidden flex items-center gap-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-5 py-3.5 rounded-2xl shadow-xl shadow-pink-300 font-bold text-sm active:scale-95 transition-all"
+                    className="fixed bottom-20 right-4 z-40 lg:hidden flex items-center gap-2.5 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-3 rounded-2xl shadow-xl shadow-pink-300 font-bold text-sm active:scale-95 transition-all"
                 >
                     <div className="relative">
-                        <ShoppingCart size={18} />
+                        <ShoppingCart size={17} />
                         <span className="absolute -top-2 -right-2 w-4 h-4 bg-white text-pink-500 text-[10px] font-black rounded-full flex items-center justify-center">
                             {cart.reduce((s, i) => s + i.quantity, 0)}
                         </span>
                     </div>
-                    <span>Lihat Pesanan</span>
+                    <span>Pesanan</span>
                     <span className="tabular-nums">{formatCurrency(total)}</span>
                 </button>
             )}

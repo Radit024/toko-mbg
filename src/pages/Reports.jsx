@@ -83,15 +83,15 @@ export default function Reports({ orders, inventory }) {
     };
 
     return (
-        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-6">
+        <div className="pb-24 md:pb-6 landscape:pb-6 animate-fade-in space-y-4">
             <div>
                 <h2 className="text-xl font-black text-slate-800">Pusat Laporan</h2>
                 <p className="text-sm text-slate-400">Download dan cetak laporan keuangan toko</p>
             </div>
 
             {/* Report Stats */}
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-5 text-white">
-                <div className="flex items-center justify-between mb-4">
+            <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-4 text-white">
+                <div className="flex items-center justify-between mb-3">
                     <div>
                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
                             {isAllData ? 'Semua Data' : `${months[selectedMonth]} ${selectedYear}`}
@@ -119,19 +119,19 @@ export default function Reports({ orders, inventory }) {
             </div>
 
             {/* Download Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 print:hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
 
                 {/* Transaksi */}
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 card-hover">
-                    <div className="flex items-center gap-3 mb-5">
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-xl"><FileText size={22} /></div>
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><FileText size={20} /></div>
                         <div>
                             <h3 className="font-bold text-slate-800">Laporan Transaksi</h3>
                             <p className="text-xs text-slate-400">Rekap penjualan detail per nota</p>
                         </div>
                     </div>
 
-                    <div className="space-y-3 mb-5">
+                    <div className="space-y-3 mb-4">
                         <div className="grid grid-cols-2 gap-2">
                             <div>
                                 <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1"><Calendar size={10} /> Bulan</label>
@@ -168,18 +168,18 @@ export default function Reports({ orders, inventory }) {
                 </div>
 
                 {/* Stok */}
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 card-hover">
-                    <div className="flex items-center gap-3 mb-5">
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><Package size={22} /></div>
+                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 card-hover">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl"><Package size={20} /></div>
                         <div>
                             <h3 className="font-bold text-slate-800">Laporan Stok & Aset</h3>
                             <p className="text-xs text-slate-400">Nilai inventaris saat ini</p>
                         </div>
                     </div>
 
-                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5">
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3 mb-4">
                         <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-1">Total Nilai Aset Gudang</p>
-                        <p className="text-xl md:text-2xl font-black text-emerald-700">{formatCurrency(totalAssetValue)}</p>
+                        <p className="text-xl font-black text-emerald-700">{formatCurrency(totalAssetValue)}</p>
                         <p className="text-xs text-emerald-400 mt-1">{inventory.length} produk aktif di gudang</p>
                     </div>
 
@@ -192,7 +192,7 @@ export default function Reports({ orders, inventory }) {
 
             {/* Preview Table */}
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-50">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-slate-50">
                     <h3 className="font-bold text-slate-800">Preview Laporan (Bulan Ini)</h3>
                     <span className="badge-gray">{monthlyOrders.length} transaksi</span>
                 </div>

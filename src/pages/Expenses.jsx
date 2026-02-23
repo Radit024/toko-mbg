@@ -48,10 +48,10 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
     const totalGenExp = generalExpenses.reduce((s, e) => s + (e.amount || 0), 0);
 
     return (
-        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-5">
+        <div className="pb-24 md:pb-6 landscape:pb-6 animate-fade-in space-y-4">
 
             {/* Header + Tabs */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div>
                     <h2 className="text-xl font-black text-slate-800">Pusat Biaya & Operasional</h2>
                     <p className="text-sm text-slate-400">Kelola pengeluaran nota dan biaya umum toko</p>
@@ -72,9 +72,9 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
 
             {/* Biaya per Nota */}
             {tab === 'nota' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                        <div className="flex items-center gap-3 mb-5">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                        <div className="flex items-center gap-3 mb-4">
                             <div className="p-2.5 bg-orange-50 text-orange-500 rounded-xl"><Truck size={20} /></div>
                             <div>
                                 <h3 className="font-bold text-slate-800">Input Biaya Nota</h3>
@@ -153,10 +153,10 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
 
             {/* Biaya Umum */}
             {tab === 'umum' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in">
                     {/* Form */}
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-fit">
-                        <div className="flex items-center gap-3 mb-5">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 h-fit">
+                        <div className="flex items-center gap-3 mb-4">
                             <div className="p-2.5 bg-red-50 text-red-500 rounded-xl"><Wallet size={20} /></div>
                             <div>
                                 <h3 className="font-bold text-slate-800">Input Biaya Umum</h3>
@@ -189,8 +189,8 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
                     </div>
 
                     {/* History */}
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                        <div className="flex items-center justify-between mb-3">
                             <h3 className="font-bold text-slate-800">Riwayat Pengeluaran</h3>
                             <div className="bg-red-50 border border-red-100 rounded-xl px-3 py-1.5">
                                 <p className="text-[10px] text-red-400 font-bold uppercase">Total</p>
@@ -214,8 +214,8 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
                                 </div>
                             ))}
                             {generalExpenses.length === 0 && (
-                                <div className="py-12 text-center">
-                                    <Wallet size={32} className="text-slate-200 mx-auto mb-2" />
+                                <div className="py-8 text-center">
+                                    <Wallet size={28} className="text-slate-200 mx-auto mb-2" />
                                     <p className="text-sm text-slate-400">Belum ada data</p>
                                 </div>
                             )}

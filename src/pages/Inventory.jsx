@@ -64,10 +64,10 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
     const endItem = Math.min(safePage * PAGE_SIZE, filtered.length);
 
     return (
-        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-5">
+        <div className="pb-24 md:pb-6 landscape:pb-6 animate-fade-in space-y-4">
 
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                 <div>
                     <h2 className="text-xl font-black text-slate-800">Manajemen Stok Barang</h2>
                     <p className="text-sm text-slate-400">Kelola stok produk, harga, dan kategori barang di tokomu.</p>
@@ -92,12 +92,12 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
                     { label: 'Stok Menipis', value: stats.lowStock, icon: AlertTriangle, color: 'text-red-500 bg-red-50' },
                     { label: 'Kategori', value: stats.categories, icon: Tag, color: 'text-purple-500 bg-purple-50' },
                 ].map(({ label, value, icon: Icon, color }) => (
-                    <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 card-hover">
-                        <div className="flex items-center justify-between mb-2">
+                    <div key={label} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-3.5 card-hover">
+                        <div className="flex items-center justify-between mb-1.5">
                             <p className="text-sm text-slate-500 font-medium">{label}</p>
-                            <div className={`p-2 rounded-xl ${color}`}><Icon size={16} /></div>
+                            <div className={`p-1.5 rounded-xl ${color}`}><Icon size={15} /></div>
                         </div>
-                        <p className="text-xl md:text-2xl font-black text-slate-800">{value}</p>
+                        <p className="text-xl font-black text-slate-800">{value}</p>
                     </div>
                 ))}
             </div>
@@ -192,8 +192,8 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
                             })}
                             {paginated.length === 0 && (
                                 <tr>
-                                    <td colSpan="7" className="px-4 py-14 text-center">
-                                        <Package size={36} className="text-slate-200 mx-auto mb-3" />
+                                    <td colSpan="7" className="px-4 py-10 text-center">
+                                        <Package size={28} className="text-slate-200 mx-auto mb-2" />
                                         <p className="font-semibold text-slate-400">Tidak ada produk ditemukan</p>
                                         <p className="text-xs text-slate-300 mt-1">Coba ubah filter atau kata kunci pencarian</p>
                                     </td>
