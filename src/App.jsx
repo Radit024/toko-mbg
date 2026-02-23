@@ -65,14 +65,18 @@ export default function App() {
 
             {ui.isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm"
+                    className="fixed inset-0 bg-black/20 z-40 md:hidden landscape:hidden backdrop-blur-sm"
                     onClick={() => ui.setIsSidebarOpen(false)}
                 />
             )}
 
-            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${ui.isSidebarMini ? 'md:ml-20' : 'md:ml-64'}`}>
+            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${ui.isSidebarMini ? 'md:ml-20 landscape:ml-20' : 'md:ml-64 landscape:ml-64'}`}>
 
-                <MobileTopBar onMenuClick={() => ui.setIsSidebarOpen(true)} />
+                <MobileTopBar
+                    user={data.user}
+                    storeProfile={data.storeProfile}
+                    handleLogout={() => data.handleLogout(ui.setActiveTab)}
+                />
 
                 <div className="p-4 md:p-10 max-w-7xl mx-auto">
                     {ui.activeTab === 'dashboard' && (

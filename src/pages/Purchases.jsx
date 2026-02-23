@@ -89,7 +89,7 @@ export default function Purchases({ inventory, restockLogs, handlePurchase, setE
     const visibleLogs = filteredLogs.slice(0, visibleLimit);
 
     return (
-        <div className="pb-24 md:pb-8 animate-fade-in space-y-6">
+        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-6">
 
             {/* Header */}
             <div className="flex items-center justify-between">

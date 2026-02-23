@@ -83,7 +83,7 @@ export default function Reports({ orders, inventory }) {
     };
 
     return (
-        <div className="pb-24 md:pb-8 animate-fade-in space-y-6">
+        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-6">
             <div>
                 <h2 className="text-xl font-black text-slate-800">Pusat Laporan</h2>
                 <p className="text-sm text-slate-400">Download dan cetak laporan keuangan toko</p>

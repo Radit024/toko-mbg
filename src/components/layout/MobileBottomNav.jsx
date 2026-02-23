@@ -4,7 +4,7 @@ export default function MobileBottomNav({ activeTab, setActiveTab, navItems }) {
     const allItems = [...(navItems?.main || []), ...(navItems?.inventory || [])];
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 z-40 print:hidden"
+        <div className="md:hidden landscape:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 z-40 print:hidden"
             style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
             <div className="flex items-end justify-around px-1 py-1 pb-safe">
                 {allItems.map(({ id, label, icon: Icon }) => {

@@ -43,12 +43,12 @@ export default function Sidebar({ isSidebarOpen, isSidebarMini, setIsSidebarMini
             {/* Backdrop mobile */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
+                    className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden landscape:hidden"
                     onClick={() => setIsSidebarOpenState(false)}
                 />
             )}
 
-            <aside className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-100 transform transition-all duration-300 md:translate-x-0
+            <aside className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-slate-100 transform transition-all duration-300 md:translate-x-0 landscape:translate-x-0
               ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
               ${isSidebarMini ? 'w-[72px]' : 'w-64'}
               print:hidden flex flex-col h-full`}>

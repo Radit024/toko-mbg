@@ -48,7 +48,7 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
     const totalGenExp = generalExpenses.reduce((s, e) => s + (e.amount || 0), 0);
 
     return (
-        <div className="pb-24 md:pb-8 animate-fade-in space-y-5">
+        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-5">
 
             {/* Header + Tabs */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

@@ -64,7 +64,7 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
     const endItem = Math.min(safePage * PAGE_SIZE, filtered.length);
 
     return (
-        <div className="pb-24 md:pb-8 animate-fade-in space-y-5">
+        <div className="pb-24 md:pb-8 landscape:pb-8 animate-fade-in space-y-5">
 
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">

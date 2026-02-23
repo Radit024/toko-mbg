@@ -279,7 +279,7 @@ export default function Sales({ inventory, handleSaveOrder }) {
 
     return (
         <>
-            <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-4 animate-fade-in">
+            <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] landscape:h-[calc(100vh-6rem)] gap-4 animate-fade-in">
 
                 {/* Left - Product Browser */}
                 <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden min-w-0">
