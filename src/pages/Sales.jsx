@@ -279,7 +279,7 @@ export default function Sales({ inventory, handleSaveOrder }) {
 
     return (
         <>
-            <div className="flex h-[calc(100vh-6rem)] gap-4 animate-fade-in">
+            <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-6rem)] gap-4 animate-fade-in">
 
                 {/* Left - Product Browser */}
                 <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden min-w-0">
@@ -297,10 +297,10 @@ export default function Sales({ inventory, handleSaveOrder }) {
                         </div>
                         <button
                             onClick={() => setBarcodeMode(!barcodeMode)}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all
+                            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all
                               ${barcodeMode ? 'bg-violet-600 text-white' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
                         >
-                            <Scan size={14} /> Scan Barcode
+                            <Scan size={14} /> <span className="hidden sm:inline">Scan Barcode</span><span className="sm:hidden">Scan</span>
                         </button>
                         <button
                             onClick={() => setShowCamera(true)}

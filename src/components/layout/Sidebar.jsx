@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Store, LogOut } from 'lucide-react';
+import { Store, LogOut, Menu, PanelLeftClose } from 'lucide-react';
 
 const NavButton = ({ id, label, icon: Icon, activeTab, setActiveTab, setIsSidebarOpen, isSidebarMini }) => {
     const isActive = activeTab === id;
@@ -54,14 +54,33 @@ export default function Sidebar({ isSidebarOpen, isSidebarMini, setIsSidebarMini
               print:hidden flex flex-col h-full`}>
 
                 {/* Logo */}
-                <div className={`flex items-center gap-3 shrink-0 border-b border-slate-100 ${isSidebarMini ? 'p-4 justify-center' : 'px-5 py-5'}`}>
-                    <div className="w-9 h-9 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-pink-200 shrink-0">
-                        <Store size={18} strokeWidth={2.5} />
-                    </div>
-                    {!isSidebarMini && (
-                        <div className="min-w-0">
-                            <h1 className="font-black text-base text-slate-800 leading-tight truncate">{storeName}</h1>
-                        </div>
+                <div className={`flex items-center shrink-0 border-b border-slate-100 ${isSidebarMini ? 'p-3 justify-center' : 'px-4 py-4 gap-3'}`}>
+                    {isSidebarMini ? (
+                        /* Mini: logo is the toggle button */
+                        <button
+                            onClick={() => setIsSidebarMini(false)}
+                            title="Buka Sidebar"
+                            className="w-9 h-9 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-pink-200 hover:opacity-90 transition-opacity"
+                        >
+                            <Store size={18} strokeWidth={2.5} />
+                        </button>
+                    ) : (
+                        /* Full: logo + name + collapse button */
+                        <>
+                            <div className="w-9 h-9 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-pink-200 shrink-0">
+                                <Store size={18} strokeWidth={2.5} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h1 className="font-black text-base text-slate-800 leading-tight truncate">{storeName}</h1>
+                            </div>
+                            <button
+                                onClick={() => setIsSidebarMini(true)}
+                                title="Tutup Sidebar"
+                                className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all shrink-0"
+                            >
+                                <PanelLeftClose size={18} />
+                            </button>
+                        </>
                     )}
                 </div>
 

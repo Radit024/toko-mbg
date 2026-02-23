@@ -1,27 +1,29 @@
 import React from 'react';
-import { LayoutDashboard, Plus, History as HistoryIcon } from 'lucide-react';
 
-export default function MobileBottomNav({ activeTab, setActiveTab }) {
+export default function MobileBottomNav({ activeTab, setActiveTab, navItems }) {
+    const allItems = [...(navItems?.main || []), ...(navItems?.inventory || [])];
+
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 flex justify-around z-40 pb-safe print:hidden shadow-[0_-5px_10px_rgba(0,0,0,0.02)]">
-            <button
-                onClick={() => setActiveTab('dashboard')}
-                className={`p-3 rounded-2xl transition-all ${activeTab === 'dashboard' ? 'bg-pink-50 text-pink-600' : 'text-gray-400'}`}
-            >
-                <LayoutDashboard size={24} />
-            </button>
-            <button
-                onClick={() => setActiveTab('sales')}
-                className={`p-3 rounded-2xl transition-all ${activeTab === 'sales' ? 'bg-pink-600 text-white shadow-lg shadow-pink-200 -translate-y-2' : 'text-gray-400'}`}
-            >
-                <Plus size={28} />
-            </button>
-            <button
-                onClick={() => setActiveTab('history')}
-                className={`p-3 rounded-2xl transition-all ${activeTab === 'history' ? 'bg-pink-50 text-pink-600' : 'text-gray-400'}`}
-            >
-                <HistoryIcon size={24} />
-            </button>
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 z-40 print:hidden"
+            style={{ boxShadow: '0 -4px 20px rgba(0,0,0,0.06)' }}>
+            <div className="flex items-end justify-around px-1 py-1 pb-safe">
+                {allItems.map(({ id, label, icon: Icon }) => {
+                    const isActive = activeTab === id;
+                    return (
+                        <button
+                            key={id}
+                            onClick={() => setActiveTab(id)}
+                            className={`flex flex-col items-center gap-1 flex-1 py-2 rounded-2xl transition-all duration-200
+                              ${isActive ? 'text-pink-600' : 'text-slate-400'}`}
+                        >
+                            <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+                            <span className={`text-[9px] font-semibold leading-none ${isActive ? 'text-pink-600' : 'text-slate-400'}`}>
+                                {label}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
         </div>
     );
 }

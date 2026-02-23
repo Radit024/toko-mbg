@@ -36,8 +36,7 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
     const saveBulkExpenses = async () => {
         if (!selectedOrderId) return;
         const cleanExpenses = tempExpenses.filter(e => e.name && e.amount);
-        const success = await handleUpdateOrderExpenses(selectedOrderId, cleanExpenses);
-        if (success) alert('Semua biaya berhasil disimpan!');
+        await handleUpdateOrderExpenses(selectedOrderId, cleanExpenses);
     };
 
     const submitGenExp = () => {
@@ -57,7 +56,7 @@ export default function Expenses({ orders, generalExpenses, handleUpdateOrderExp
                     <h2 className="text-xl font-black text-slate-800">Pusat Biaya & Operasional</h2>
                     <p className="text-sm text-slate-400">Kelola pengeluaran nota dan biaya umum toko</p>
                 </div>
-                <div className="flex bg-slate-100 p-1 rounded-xl">
+                <div className="flex w-full sm:w-auto bg-slate-100 p-1 rounded-xl">
                     <button onClick={() => setTab('nota')}
                         className={`px-5 py-2.5 rounded-lg font-semibold text-sm transition-all
                           ${tab === 'nota' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>

@@ -59,7 +59,7 @@ export default function History({ orders, setEditingOrder, handleDeleteOrder, ha
                     </div>
 
                     {/* View Toggle */}
-                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                    <div className="flex w-full sm:w-auto items-center gap-1 bg-slate-100 p-1 rounded-xl">
                         <button onClick={() => setViewMode('orders')}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all
                               ${viewMode === 'orders' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
@@ -83,11 +83,11 @@ export default function History({ orders, setEditingOrder, handleDeleteOrder, ha
                             onChange={e => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
+                    <div className="flex items-center gap-2 flex-wrap bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
                         <Clock size={14} className="text-slate-400 shrink-0" />
-                        <input type="date" className="text-xs outline-none text-slate-600 bg-transparent" value={filterDateStart} onChange={e => setFilterDateStart(e.target.value)} />
+                        <input type="date" className="text-xs outline-none text-slate-600 bg-transparent min-w-0 flex-1" value={filterDateStart} onChange={e => setFilterDateStart(e.target.value)} />
                         <span className="text-slate-300">—</span>
-                        <input type="date" className="text-xs outline-none text-slate-600 bg-transparent" value={filterDateEnd} onChange={e => setFilterDateEnd(e.target.value)} />
+                        <input type="date" className="text-xs outline-none text-slate-600 bg-transparent min-w-0 flex-1" value={filterDateEnd} onChange={e => setFilterDateEnd(e.target.value)} />
                     </div>
                 </div>
             </div>

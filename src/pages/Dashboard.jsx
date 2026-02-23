@@ -78,7 +78,7 @@ export default function Dashboard({
             {/* Greeting */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                 <div>
-                    <h1 className="text-2xl font-black text-slate-800 leading-tight">
+                    <h1 className="text-xl md:text-2xl font-black text-slate-800 leading-tight">
                         {greeting()}, {firstName}! 👋
                     </h1>
                     <p className="text-sm text-slate-400 mt-0.5">Here's what's happening with your store today.</p>
@@ -98,7 +98,7 @@ export default function Dashboard({
                         <p className="text-sm text-slate-500 font-medium">Today's Revenue</p>
                         <div className="p-2 bg-blue-50 rounded-xl"><Wallet size={16} className="text-blue-500" /></div>
                     </div>
-                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">
+                    <p className="text-lg md:text-2xl font-black text-slate-800 leading-tight mb-2">
                         {formatCurrency(todayStats.todayRev)}
                     </p>
                     <TrendBadge change={todayStats.revenueChange} />
@@ -110,7 +110,7 @@ export default function Dashboard({
                         <p className="text-sm text-slate-500 font-medium">Total Orders</p>
                         <div className="p-2 bg-pink-50 rounded-xl"><ShoppingBag size={16} className="text-pink-500" /></div>
                     </div>
-                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">{todayStats.count}</p>
+                    <p className="text-lg md:text-2xl font-black text-slate-800 leading-tight mb-2">{todayStats.count}</p>
                     <TrendBadge change={todayStats.ordersChange} />
                 </div>
 
@@ -120,7 +120,7 @@ export default function Dashboard({
                         <p className="text-sm text-slate-500 font-medium">Avg. Order Value</p>
                         <div className="p-2 bg-amber-50 rounded-xl"><FileText size={16} className="text-amber-500" /></div>
                     </div>
-                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">
+                    <p className="text-lg md:text-2xl font-black text-slate-800 leading-tight mb-2">
                         {formatCurrency(todayStats.avgOrder)}
                     </p>
                     <TrendBadge change={todayStats.avgChange} />
@@ -132,7 +132,7 @@ export default function Dashboard({
                         <p className="text-sm text-slate-500 font-medium">Low Stock Items</p>
                         <div className="p-2 bg-red-50 rounded-xl"><Package size={16} className="text-red-500" /></div>
                     </div>
-                    <p className="text-2xl font-black text-slate-800 leading-tight mb-2">
+                    <p className="text-lg md:text-2xl font-black text-slate-800 leading-tight mb-2">
                         {stats.outStock + stats.lowStock}
                     </p>
                     <span className="text-xs text-slate-400">

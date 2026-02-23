@@ -3,7 +3,11 @@ import { onAuthStateChanged, signOut, updateProfile, updatePassword } from "fire
 import { auth } from '../config/firebase';
 import { api } from '../config/api';
 
-export function useAppData() {
+export function useAppData({ toast, confirm } = {}) {
+    // Fallbacks to native browser dialogs if no notification system provided
+    const _toast = toast || ((msg) => alert(msg));
+    const _confirm = confirm || ((title, msg) => Promise.resolve(window.confirm(msg || title)));
+
     // --- AUTH & STORE ---
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
@@ -72,38 +76,34 @@ export function useAppData() {
 
     // --- AUTH HANDLERS ---
     const handleLogout = async (setActiveTab) => {
-        if (window.confirm("Yakin ingin keluar aplikasi?")) {
-            try {
-                await signOut(auth);
-                localStorage.removeItem('connected_store_id');
-                setActiveTab('dashboard');
-            } catch (error) { alert("Logout Gagal: " + error.message); }
-        }
+        const ok = await _confirm('Keluar Aplikasi?', 'Yakin ingin keluar dari sesi ini?', { type: 'confirm', confirmLabel: 'Ya, Keluar' });
+        if (!ok) return;
+        try {
+            await signOut(auth);
+            localStorage.removeItem('connected_store_id');
+            setActiveTab('dashboard');
+        } catch (error) { _toast('Logout Gagal: ' + error.message, 'error'); }
     };
 
     const handleConnectStore = async (targetInput) => {
         if (!targetInput) {
             localStorage.removeItem('connected_store_id');
             setActiveStoreId(user.uid);
-            alert("Kembali ke Toko Pribadi (Mode Bos).");
+            _toast('Kembali ke Toko Pribadi (Mode Bos).', 'info');
             setShowStoreModal(false);
             return;
         }
         try {
             const result = await api.get(`/store/resolve/${encodeURIComponent(targetInput.toLowerCase())}`, user.uid);
             const targetUid = result.ownerUid || targetInput;
-            if (result.storeName) {
-                alert(`Berhasil menemukan toko: ${result.storeName}`);
-            }
             localStorage.setItem('connected_store_id', targetUid);
             setActiveStoreId(targetUid);
-            alert("Berhasil terhubung! Data akan disinkronkan.");
+            _toast(result.storeName ? `Terhubung ke toko: ${result.storeName}` : 'Berhasil terhubung!', 'success');
             setShowStoreModal(false);
         } catch (error) {
-            // Jika alias tidak ditemukan, coba langsung pakai input sebagai UID
             localStorage.setItem('connected_store_id', targetInput);
             setActiveStoreId(targetInput);
-            alert("Berhasil terhubung! Data akan disinkronkan.");
+            _toast('Berhasil terhubung! Data akan disinkronkan.', 'success');
             setShowStoreModal(false);
         }
     };
@@ -114,10 +114,10 @@ export function useAppData() {
         try {
             if (activeStoreId === user.uid) {
                 await api.put('/store/profile', { storeName, storeAddress }, activeStoreId);
-                alert("Informasi Toko Diperbarui!");
+                _toast('Informasi toko berhasil diperbarui.', 'success');
                 await fetchAll();
-            } else alert("Hanya pemilik toko yang bisa mengubah info toko.");
-        } catch (e) { alert("Gagal update toko: " + e.message); }
+            } else _toast('Hanya pemilik toko yang bisa mengubah info toko.', 'warning');
+        } catch (e) { _toast('Gagal update toko: ' + e.message, 'error'); }
     };
 
     const handleSaveStoreSettings = async (storeName, customAlias) => {
@@ -132,58 +132,63 @@ export function useAppData() {
             await api.put('/user/profile', {
                 phoneNumber, photoURL, ownerName: displayName
             }, user.uid);
-            alert("Profil Pribadi Diperbarui!");
+            _toast('Profil pribadi berhasil diperbarui.', 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal update profil: " + e.message); }
+        } catch (e) { _toast('Gagal update profil: ' + e.message, 'error'); }
     };
 
     const handleChangePassword = async (newPass) => {
         try {
             await updatePassword(user, newPass);
-            alert("Password berhasil diubah! Silakan login ulang nanti.");
-        } catch (e) { alert("Gagal ganti password: " + e.message); }
+            _toast('Password berhasil diubah! Silakan login ulang nanti.', 'success');
+        } catch (e) { _toast('Gagal ganti password: ' + e.message, 'error'); }
     };
 
     // --- PURCHASE / RESTOCK HANDLERS ---
     const handlePurchase = async (data) => {
-        if (!activeStoreId) { alert("Koneksi database belum siap."); return false; }
+        if (!activeStoreId) { _toast('Koneksi database belum siap.', 'error'); return false; }
         const { itemName, quantity, pricePerUnit } = data;
-        if (!itemName?.trim()) { alert("Nama produk wajib diisi!"); return false; }
+        if (!itemName?.trim()) { _toast('Nama produk wajib diisi!', 'warning'); return false; }
         const qty = parseFloat(quantity);
         const price = parseFloat(pricePerUnit);
-        if (!qty || qty <= 0) { alert("Jumlah stok masuk harus lebih dari 0!"); return false; }
-        if (isNaN(price) || price < 0) { alert("Harga modal tidak valid!"); return false; }
+        if (!qty || qty <= 0) { _toast('Jumlah stok masuk harus lebih dari 0!', 'warning'); return false; }
+        if (isNaN(price) || price < 0) { _toast('Harga modal tidak valid!', 'warning'); return false; }
         try {
             await api.post('/restock', data, activeStoreId);
-            alert("Stok & Harga Jual berhasil disimpan!");
+            _toast('Stok & harga jual berhasil disimpan.', 'success');
             await fetchAll();
             return true;
-        } catch (error) { alert("Gagal: " + error.message); return false; }
+        } catch (error) { _toast('Gagal: ' + error.message, 'error'); return false; }
     };
 
     const handleUpdateRestock = async (logId, newData, setEditingRestock) => {
         if (!activeStoreId) return;
         try {
             await api.put(`/restock/${logId}`, newData, activeStoreId);
-            alert("Data Restock & Stok Gudang Diperbarui!");
+            _toast('Data restock & stok gudang berhasil diperbarui.', 'success');
             setEditingRestock(null);
             await fetchAll();
-        } catch (e) { alert("Gagal update: " + e.message); }
+        } catch (e) { _toast('Gagal update: ' + e.message, 'error'); }
     };
 
     const handleDeleteRestock = async (log) => {
-        if (!window.confirm(`Hapus riwayat masuk "${log.itemName}"? Stok akan dikurangi.`)) return;
+        const ok = await _confirm(
+            'Hapus Riwayat Restock?',
+            `Tindakan ini akan menghapus riwayat masuk "${log.itemName}" dan stok akan dikurangi.`,
+            { itemName: log.itemName, type: 'delete' }
+        );
+        if (!ok) return;
         try {
             await api.del(`/restock/${log.id}`, activeStoreId);
-            alert("Riwayat dihapus.");
+            _toast('Riwayat restock berhasil dihapus.', 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal: " + e.message); }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); }
     };
 
     const handleSaveInventoryItem = async (data) => {
-        if (!activeStoreId) return alert("Koneksi database belum siap.");
+        if (!activeStoreId) { _toast('Koneksi database belum siap.', 'error'); return false; }
         const { id, name, category, unit, sellPrice, avgCost, stock, barcode, minStock } = data;
-        if (!name?.trim()) return alert("Nama produk wajib diisi.");
+        if (!name?.trim()) { _toast('Nama produk wajib diisi.', 'warning'); return false; }
         const payload = {
             name: name.trim(), category: category || 'Umum', unit: unit || 'pcs',
             sellPrice: parseFloat(sellPrice) || 0, avgCost: parseFloat(avgCost) || 0,
@@ -194,28 +199,34 @@ export function useAppData() {
         try {
             if (id) {
                 await api.put(`/inventory/${id}`, payload, activeStoreId);
+                _toast('Detail produk berhasil diperbarui. Stok terkini telah disinkronisasi.', 'success');
             } else {
                 await api.post('/inventory', payload, activeStoreId);
+                _toast('Produk baru berhasil ditambahkan ke inventaris.', 'success');
             }
             await fetchAll();
             return true;
-        } catch (e) { alert("Gagal: " + e.message); return false; }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); return false; }
     };
 
     const handleDeleteInventoryItem = async (item) => {
-        if (!window.confirm(`PERINGATAN 1/2: Hapus "${item.name}"?`)) return;
-        if (!window.confirm(`PERINGATAN 2/2: Hapus Permanen?`)) return;
+        const ok = await _confirm(
+            'Hapus Produk Ini?',
+            `Tindakan ini akan menghapus "${item.name}" secara permanen dari inventaris toko Anda. Data yang dihapus tidak dapat dikembalikan.`,
+            { itemName: item.name, type: 'delete' }
+        );
+        if (!ok) return;
         try {
             await api.del(`/inventory/${item.id}`, activeStoreId);
-            alert("Barang berhasil dihapus.");
+            _toast(`"${item.name}" berhasil dihapus dari inventaris.`, 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal menghapus: " + e.message); }
+        } catch (e) { _toast('Gagal menghapus: ' + e.message, 'error'); }
     };
 
     // --- ORDER / SALES HANDLERS ---
     const handleSaveOrder = async (cartItems, date, notes, customerName, paymentMethod, paymentStatus) => {
-        if (!activeStoreId) return alert("Koneksi database belum siap.");
-        if (cartItems.length === 0) return alert("Keranjang kosong!");
+        if (!activeStoreId) { _toast('Koneksi database belum siap.', 'error'); return false; }
+        if (cartItems.length === 0) { _toast('Keranjang kosong!', 'warning'); return false; }
         try {
             await api.post('/orders', {
                 items: cartItems, date, notes,
@@ -224,10 +235,10 @@ export function useAppData() {
                 paymentStatus: paymentStatus || 'Lunas',
                 cashierName: user.displayName || user.email,
             }, activeStoreId);
-            alert("Pesanan Berhasil Disimpan!");
+            _toast('Pesanan berhasil disimpan.', 'success', { title: 'Pesanan Tersimpan' });
             await fetchAll();
             return true;
-        } catch (error) { alert("Gagal: " + error.message); return false; }
+        } catch (error) { _toast('Gagal: ' + error.message, 'error'); return false; }
     };
 
     const handleFullUpdateOrder = async (originalOrder, newItemList, metadata, setEditingOrder) => {
@@ -236,19 +247,20 @@ export function useAppData() {
             await api.put(`/orders/${originalOrder.id}`, {
                 items: newItemList, metadata,
             }, activeStoreId);
-            alert("Nota berhasil diupdate!");
+            _toast('Nota berhasil diperbarui.', 'success');
             setEditingOrder(null);
             await fetchAll();
-        } catch (e) { alert("Gagal: " + e.message); }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); }
     };
 
     const handleQuickPay = async (orderId) => {
-        if (!window.confirm("Tandai nota ini sebagai LUNAS?")) return;
+        const ok = await _confirm('Tandai Lunas?', 'Tandai nota ini sebagai LUNAS?', { type: 'confirm', confirmLabel: 'Ya, Lunas' });
+        if (!ok) return;
         try {
             await api.put(`/orders/${orderId}/pay`, {}, activeStoreId);
-            alert("Status diperbarui menjadi Lunas.");
+            _toast('Status nota diperbarui menjadi Lunas.', 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal update: " + e.message); }
+        } catch (e) { _toast('Gagal update: ' + e.message, 'error'); }
     };
 
     const handleUpdateOrderExpenses = async (orderId, newExpensesList) => {
@@ -257,17 +269,22 @@ export function useAppData() {
             await api.put(`/orders/${orderId}/expenses`, { expenses: newExpensesList }, activeStoreId);
             await fetchAll();
             return true;
-        } catch (e) { alert("Gagal: " + e.message); return false; }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); return false; }
     };
 
     const handleDeleteOrder = async (order) => {
         if (!activeStoreId) return;
-        if (!window.confirm("Hapus Nota? Stok akan dikembalikan.")) return;
+        const ok = await _confirm(
+            'Hapus Nota Ini?',
+            `Hapus nota ini? Stok barang akan dikembalikan ke inventaris.`,
+            { type: 'delete', confirmLabel: 'Ya, Hapus' }
+        );
+        if (!ok) return;
         try {
             await api.del(`/orders/${order.id}`, activeStoreId);
-            alert("Nota dihapus.");
+            _toast('Nota berhasil dihapus. Stok telah dikembalikan.', 'success');
             await fetchAll();
-        } catch (error) { alert("Gagal: " + error.message); }
+        } catch (error) { _toast('Gagal: ' + error.message, 'error'); }
     };
 
     // --- EXPENSE & WITHDRAWAL HANDLERS ---
@@ -275,26 +292,28 @@ export function useAppData() {
         if (!activeStoreId) return;
         try {
             await api.post('/expenses', data, activeStoreId);
-            alert("Biaya umum disimpan.");
+            _toast('Biaya umum berhasil disimpan.', 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal: " + e.message); }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); }
     };
 
     const handleWithdrawal = async (data) => {
         if (!activeStoreId) return;
         try {
             await api.post('/withdrawals', data, activeStoreId);
-            alert("Penarikan uang tercatat!");
+            _toast('Penarikan uang berhasil tercatat.', 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal: " + e.message); }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); }
     };
 
     const handleDeleteWithdrawal = async (id) => {
-        if (!window.confirm("Hapus catatan penarikan ini?")) return;
+        const ok = await _confirm('Hapus Penarikan?', 'Hapus catatan penarikan ini secara permanen?', { type: 'delete', confirmLabel: 'Ya, Hapus' });
+        if (!ok) return;
         try {
             await api.del(`/withdrawals/${id}`, activeStoreId);
+            _toast('Catatan penarikan berhasil dihapus.', 'success');
             await fetchAll();
-        } catch (e) { alert("Gagal: " + e.message); }
+        } catch (e) { _toast('Gagal: ' + e.message, 'error'); }
     };
 
     // --- COMPUTED STATS ---

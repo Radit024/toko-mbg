@@ -224,11 +224,11 @@ export default function Purchases({ inventory, restockLogs, handlePurchase, setE
                             <option value="highest">Termahal</option>
                             <option value="lowest">Termurah</option>
                         </select>
-                        <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
-                            <Filter size={12} className="text-slate-400" />
-                            <input type="date" className="text-xs outline-none bg-transparent text-slate-600" value={filterStartDate} onChange={e => setFilterStartDate(e.target.value)} />
+                        <div className="flex items-center gap-1.5 flex-wrap bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-sm">
+                            <Filter size={12} className="text-slate-400 shrink-0" />
+                            <input type="date" className="text-xs outline-none bg-transparent text-slate-600 min-w-0 flex-1" value={filterStartDate} onChange={e => setFilterStartDate(e.target.value)} />
                             <span className="text-slate-300">—</span>
-                            <input type="date" className="text-xs outline-none bg-transparent text-slate-600" value={filterEndDate} onChange={e => setFilterEndDate(e.target.value)} />
+                            <input type="date" className="text-xs outline-none bg-transparent text-slate-600 min-w-0 flex-1" value={filterEndDate} onChange={e => setFilterEndDate(e.target.value)} />
                         </div>
                         {(filterStartDate || filterEndDate || searchSupplier || sortBy !== 'newest') && (
                             <button onClick={() => { setFilterStartDate(''); setFilterEndDate(''); setSearchSupplier(''); setSortBy('newest'); }}

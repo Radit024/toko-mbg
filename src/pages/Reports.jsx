@@ -179,7 +179,7 @@ export default function Reports({ orders, inventory }) {
 
                     <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-5">
                         <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider mb-1">Total Nilai Aset Gudang</p>
-                        <p className="text-2xl font-black text-emerald-700">{formatCurrency(totalAssetValue)}</p>
+                        <p className="text-xl md:text-2xl font-black text-emerald-700">{formatCurrency(totalAssetValue)}</p>
                         <p className="text-xs text-emerald-400 mt-1">{inventory.length} produk aktif di gudang</p>
                     </div>
 

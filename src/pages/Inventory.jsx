@@ -97,7 +97,7 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
                             <p className="text-sm text-slate-500 font-medium">{label}</p>
                             <div className={`p-2 rounded-xl ${color}`}><Icon size={16} /></div>
                         </div>
-                        <p className="text-2xl font-black text-slate-800">{value}</p>
+                        <p className="text-xl md:text-2xl font-black text-slate-800">{value}</p>
                     </div>
                 ))}
             </div>
@@ -106,8 +106,8 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
 
                 {/* Filters */}
-                <div className="flex flex-row items-center gap-3 p-4 border-b border-slate-100">
-                    <div className="relative w-80 shrink-0">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 border-b border-slate-100">
+                    <div className="relative w-full sm:w-80 shrink-0">
                         <input
                             className="input-modern pl-10 w-full"
                             placeholder="Cari nama barang, SKU, atau barcode..."
@@ -115,12 +115,12 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
                             onChange={e => handleSearch(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2 ml-auto shrink-0">
-                        <select className="input-modern text-sm px-3 min-w-[155px]" value={categoryFilter} onChange={e => handleCategory(e.target.value)}>
+                    <div className="flex items-center gap-2 sm:ml-auto flex-wrap">
+                        <select className="input-modern text-sm px-3 w-full sm:min-w-[155px]" value={categoryFilter} onChange={e => handleCategory(e.target.value)}>
                             <option value="">Semua Kategori</option>
                             {categories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
-                        <select className="input-modern text-sm px-3 min-w-[130px]" value={statusFilter} onChange={e => handleStatus(e.target.value)}>
+                        <select className="input-modern text-sm px-3 w-full sm:min-w-[130px]" value={statusFilter} onChange={e => handleStatus(e.target.value)}>
                             <option value="">Status Stok</option>
                             <option value="tersedia">Tersedia</option>
                             <option value="tipis">Stok Menipis</option>
@@ -253,7 +253,7 @@ export default function Inventory({ inventory, handleDeleteInventoryItem, handle
                 {/* Pagination */}
                 {filtered.length > 0 && (
                     <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-50">
-                        <p className="text-sm text-slate-500">
+                        <p className="hidden sm:block text-sm text-slate-500">
                             Menampilkan <span className="font-semibold text-slate-700">{startItem}</span> sampai{' '}
                             <span className="font-semibold text-slate-700">{endItem}</span> dari{' '}
                             <span className="font-semibold text-slate-700">{filtered.length}</span> hasil

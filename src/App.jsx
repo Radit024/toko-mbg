@@ -3,6 +3,7 @@
 // Hooks
 import { useAppData } from './hooks/useAppData';
 import { useUIState } from './hooks/useUIState';
+import { useNotifications } from './hooks/useNotifications';
 
 // Config
 import { navItems } from './config/navItems';
@@ -22,6 +23,8 @@ import Sidebar from './components/layout/Sidebar';
 import ReceiptTemplate from './components/ui/ReceiptTemplate';
 import MobileTopBar from './components/layout/MobileTopBar';
 import MobileBottomNav from './components/layout/MobileBottomNav';
+import ToastContainer from './components/ui/Toast';
+import ConfirmModal from './components/ui/ConfirmModal';
 
 // Modals
 import EditOrderModal from './components/modals/EditOrderModal';
@@ -34,7 +37,8 @@ import WithdrawalModal from './components/modals/WithdrawalModal';
 
 export default function App() {
     const ui = useUIState();
-    const data = useAppData();
+    const notif = useNotifications();
+    const data = useAppData({ toast: notif.toast, confirm: notif.confirm });
 
     if (data.authLoading) return (
         <div className="flex h-screen items-center justify-center text-pink-600 font-bold">
@@ -136,7 +140,7 @@ export default function App() {
                 {ui.printOrder && <ReceiptTemplate order={ui.printOrder} />}
             </main>
 
-            <MobileBottomNav activeTab={ui.activeTab} setActiveTab={ui.setActiveTab} />
+            <MobileBottomNav activeTab={ui.activeTab} setActiveTab={ui.setActiveTab} navItems={navItems} />
 
             {ui.editingOrder && (
                 <EditOrderModal
@@ -188,6 +192,10 @@ export default function App() {
                     user={data.user}
                 />
             )}
+
+            {/* Global Notifications */}
+            <ToastContainer toasts={notif.toasts} onRemove={notif.removeToast} />
+            <ConfirmModal state={notif.confirmState} onClose={notif.handleConfirmClose} />
 
             <style>{`
                 @media print {
