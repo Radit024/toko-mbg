@@ -9,9 +9,9 @@ app.use(cors());
 app.use(express.json());
 app.use('/api', verifyAuth);
 
-// ════════════════════════════════════════════════════════════════
+// 
 //  MAPPER HELPERS  — snake_case (DB) → camelCase (Frontend)
-// ════════════════════════════════════════════════════════════════
+// 
 
 const mapInventory = (r) => ({
     id: r.id, name: r.name, stock: Number(r.stock), unit: r.unit,
@@ -61,9 +61,9 @@ const mapProfile = (r) => r ? ({
     photoURL: r.photo_url, ownerName: r.owner_name,
 }) : null;
 
-// ════════════════════════════════════════════════════════════════
+// 
 //  GET /api/data  — Ambil semua data toko sekaligus
-// ════════════════════════════════════════════════════════════════
+// 
 
 const ORDERS_QUERY = `
     SELECT o.*,
@@ -104,9 +104,9 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// ════════════════════════════════════════════════════════════════
+// 
 //  STORE PROFILE & ALIASES
-// ════════════════════════════════════════════════════════════════
+// 
 
 app.put('/api/store/profile', async (req, res) => {
     const client = await pool.connect();
@@ -197,9 +197,9 @@ app.put('/api/user/profile', async (req, res) => {
     }
 });
 
-// ════════════════════════════════════════════════════════════════
+// 
 //  INVENTORY
-// ════════════════════════════════════════════════════════════════
+// 
 
 app.post('/api/inventory', async (req, res) => {
     try {
@@ -250,9 +250,9 @@ app.delete('/api/inventory/:id', async (req, res) => {
     }
 });
 
-// ════════════════════════════════════════════════════════════════
+// 
 //  RESTOCK / PURCHASE
-// ════════════════════════════════════════════════════════════════
+// 
 
 app.post('/api/restock', async (req, res) => {
     const client = await pool.connect();
@@ -414,9 +414,9 @@ app.delete('/api/restock/:id', async (req, res) => {
     } finally { client.release(); }
 });
 
-// ════════════════════════════════════════════════════════════════
+// 
 //  ORDERS / PENJUALAN
-// ════════════════════════════════════════════════════════════════
+// 
 
 app.post('/api/orders', async (req, res) => {
     const client = await pool.connect();
@@ -597,9 +597,7 @@ app.delete('/api/orders/:id', async (req, res) => {
     } finally { client.release(); }
 });
 
-// ════════════════════════════════════════════════════════════════
 //  GENERAL EXPENSES
-// ════════════════════════════════════════════════════════════════
 
 app.post('/api/expenses', async (req, res) => {
     try {
@@ -614,9 +612,7 @@ app.post('/api/expenses', async (req, res) => {
     }
 });
 
-// ════════════════════════════════════════════════════════════════
 //  WITHDRAWALS
-// ════════════════════════════════════════════════════════════════
 
 app.post('/api/withdrawals', async (req, res) => {
     try {
@@ -640,9 +636,7 @@ app.delete('/api/withdrawals/:id', async (req, res) => {
     }
 });
 
-// ════════════════════════════════════════════════════════════════
 //  STATIC FILES (Production)
-// ════════════════════════════════════════════════════════════════
 
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -655,21 +649,16 @@ if (process.env.NODE_ENV === 'production') {
     });
 }
 
-// ════════════════════════════════════════════════════════════════
 //  GLOBAL ERROR HANDLER — ensures all errors return JSON
-// ════════════════════════════════════════════════════════════════
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err);
     res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
-
-// ════════════════════════════════════════════════════════════════
+ 
 //  START SERVER
-// ════════════════════════════════════════════════════════════════
-
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
 });
