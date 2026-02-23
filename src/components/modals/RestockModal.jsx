@@ -1,9 +1,11 @@
 import React, { useState, useRef } from 'react';
 import {
-    X, PackagePlus, Camera, Calendar, Package, ChevronRight,
-    Tag, DollarSign
+    X, PackagePlus, Camera, Calendar, Package, ChevronDown,
+    Tag, DollarSign, Barcode, Info, Save
 } from 'lucide-react';
 import CameraScanner from '../ui/CameraScanner';
+
+const inputCls = "w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition-all";
 
 export default function RestockModal({ inventory, handlePurchase, onClose }) {
     const [form, setForm] = useState({
@@ -16,6 +18,11 @@ export default function RestockModal({ inventory, handlePurchase, onClose }) {
     const quantityInputRef = useRef(null);
 
     const categories = [...new Set(inventory.map(i => i.category).filter(Boolean))].sort();
+
+    // Margin calculation
+    const modal = parseFloat(form.pricePerUnit) || 0;
+    const jual = parseFloat(form.sellPrice) || 0;
+    const marginPct = modal > 0 && jual > 0 ? (((jual - modal) / modal) * 100).toFixed(1) : null;
 
     const handleQtyChange = (val) => {
         const unitPrice = parseFloat(form.pricePerUnit) || 0;
@@ -71,170 +78,217 @@ export default function RestockModal({ inventory, handlePurchase, onClose }) {
 
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 overflow-y-auto">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
                 {/* Backdrop */}
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
                 {/* Dialog */}
-                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mb-10 flex flex-col overflow-hidden animate-scale-in">
+                <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-pink-200">
-                                <PackagePlus size={16} />
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-pink-200">
+                                <PackagePlus size={18} />
                             </div>
                             <div>
-                                <h3 className="font-bold text-slate-800">Tambah / Restock Barang</h3>
-                                <p className="text-[11px] text-slate-400">Input pembelian & stok masuk</p>
+                                <h3 className="font-bold text-slate-800 text-base">Tambah / Restock Barang</h3>
+                                <p className="text-[11px] text-slate-400">Isi detail produk di bawah ini untuk menambah stok ke inventaris.</p>
                             </div>
                         </div>
-                        <button
-                            onClick={onClose}
-                            className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors"
-                        >
+                        <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-400 transition-colors">
                             <X size={18} />
                         </button>
                     </div>
 
-                    {/* Body */}
-                    <form onSubmit={submit} className="px-5 py-5 space-y-4 overflow-y-auto max-h-[75vh] custom-scrollbar">
-
-                        {/* Mode toggle */}
-                        <div className="flex bg-slate-100 p-1 rounded-xl max-w-xs">
-                            <button type="button"
-                                onClick={() => { setMode('existing'); setForm(f => ({ ...f, existingId: null })); }}
-                                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all
-                                  ${mode === 'existing' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>
-                                Stok Lama
-                            </button>
-                            <button type="button"
-                                onClick={() => { setMode('new'); setForm(f => ({ ...f, existingId: null })); }}
-                                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all
-                                  ${mode === 'new' ? 'bg-white text-pink-600 shadow-sm' : 'text-slate-500'}`}>
-                                Barang Baru
-                            </button>
-                        </div>
-
-                        {/* Scan Barcode */}
+                    {/* Mode toggle */}
+                    <div className="flex gap-2 px-6 pt-4">
                         <button type="button"
-                            onClick={() => setShowCamera(true)}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm shadow-blue-200">
-                            <Camera size={15} /> Scan Barcode
+                            onClick={() => { setMode('existing'); setForm(f => ({ ...f, existingId: null, itemName: '' })); }}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border ${mode === 'existing' ? 'bg-pink-50 border-pink-300 text-pink-600' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                            Stok Lama
                         </button>
+                        <button type="button"
+                            onClick={() => { setMode('new'); setForm(f => ({ ...f, existingId: null })); }}
+                            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all border ${mode === 'new' ? 'bg-pink-50 border-pink-300 text-pink-600' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}`}>
+                            Barang Baru
+                        </button>
+                    </div>
 
-                        {/* Date */}
-                        <div>
-                            <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1.5">
-                                <Calendar size={12} /> Tanggal Masuk
-                            </label>
-                            <input type="datetime-local" className="input-modern"
-                                value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-                        </div>
+                    {/* Body — two column */}
+                    <form onSubmit={submit} className="px-6 py-4 overflow-y-auto max-h-[75vh] custom-scrollbar">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {/* Item select or name */}
-                        <div>
-                            <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1.5">
-                                <Package size={12} /> {mode === 'existing' ? 'Pilih Barang dari Stok' : 'Nama Barang Baru'}
-                            </label>
-                            {mode === 'existing' ? (
-                                <div className="relative">
-                                    <select className="input-modern appearance-none pr-8"
-                                        onChange={handleExistSelect} value={form.existingId || ''}>
-                                        <option value="">-- Pilih Barang --</option>
-                                        {inventory.map(i => (
-                                            <option key={i.id} value={i.id}>{i.name} (Sisa: {i.stock} {i.unit})</option>
-                                        ))}
-                                    </select>
-                                    <ChevronRight size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 rotate-90 pointer-events-none" />
+                            {/* ── LEFT: IDENTITAS PRODUK ── */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Package size={13} className="text-pink-500" />
+                                    <span className="text-[11px] font-bold text-pink-500 tracking-widest uppercase">Identitas Produk</span>
                                 </div>
-                            ) : (
-                                <input className="input-modern" placeholder="Nama barang baru"
-                                    value={form.itemName} onChange={e => setForm(f => ({ ...f, itemName: e.target.value }))} />
-                            )}
-                        </div>
 
-                        {/* Barcode + Category */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Barcode</label>
-                                <input className="input-modern" placeholder="Scan/Ketik Barcode"
-                                    value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Kategori</label>
-                                <select className="input-modern" value={form.category}
-                                    onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                                    {!categories.includes(form.category) && (
-                                        <option value={form.category}>{form.category}</option>
+                                {/* Nama / Pilih barang */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 mb-1.5 block">
+                                        {mode === 'existing' ? 'Pilih Barang dari Stok' : 'Nama Produk'}
+                                    </label>
+                                    {mode === 'existing' ? (
+                                        <div className="relative">
+                                            <select className={`${inputCls} appearance-none pr-8`}
+                                                onChange={handleExistSelect} value={form.existingId || ''}>
+                                                <option value="">-- Pilih Barang --</option>
+                                                {inventory.map(i => (
+                                                    <option key={i.id} value={i.id}>{i.name} (Sisa: {i.stock} {i.unit})</option>
+                                                ))}
+                                            </select>
+                                            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                        </div>
+                                    ) : (
+                                        <input className={inputCls} placeholder="Contoh: Kopi Susu Gula Aren"
+                                            value={form.itemName} onChange={e => setForm(f => ({ ...f, itemName: e.target.value }))} />
                                     )}
-                                    <option value="Umum">Umum</option>
-                                    <option value="Makanan">Makanan</option>
-                                    <option value="Minuman">Minuman</option>
-                                    <option value="Sembako">Sembako</option>
-                                    <option value="Rokok">Rokok</option>
-                                </select>
+                                </div>
+
+                                {/* Kategori */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Kategori</label>
+                                    <div className="relative">
+                                        <select className={`${inputCls} appearance-none pr-8`} value={form.category}
+                                            onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                            {!categories.includes(form.category) && (
+                                                <option value={form.category}>{form.category}</option>
+                                            )}
+                                            <option value="Umum">Umum</option>
+                                            <option value="Makanan">Makanan</option>
+                                            <option value="Minuman">Minuman</option>
+                                            <option value="Sembako">Sembako</option>
+                                            <option value="Rokok">Rokok</option>
+                                        </select>
+                                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                {/* Barcode / SKU */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Barcode / SKU</label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <Barcode size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                                            <input className={`${inputCls} pl-8`} placeholder="Scan atau ketik manual"
+                                                value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} />
+                                        </div>
+                                        <button type="button" onClick={() => setShowCamera(true)}
+                                            className="w-10 h-10 flex items-center justify-center bg-pink-50 border border-pink-200 rounded-xl text-pink-500 hover:bg-pink-100 transition-colors flex-shrink-0">
+                                            <Camera size={16} />
+                                        </button>
+                                    </div>
+                                    <p className="text-[11px] text-slate-400 mt-1">Biarkan kosong untuk generate SKU otomatis.</p>
+                                </div>
+
+                                {/* Supplier */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Supplier</label>
+                                    <input className={inputCls} placeholder="Nama Toko / Supplier"
+                                        value={form.supplier} onChange={e => setForm(f => ({ ...f, supplier: e.target.value }))} />
+                                </div>
+
+                                {/* Tanggal Masuk */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                                        <Calendar size={12} /> Tanggal Masuk
+                                    </label>
+                                    <input type="datetime-local" className={inputCls}
+                                        value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+                                </div>
+                            </div>
+
+                            {/* ── RIGHT: HARGA & STOK ── */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <DollarSign size={13} className="text-pink-500" />
+                                    <span className="text-[11px] font-bold text-pink-500 tracking-widest uppercase">Harga &amp; Stok</span>
+                                </div>
+
+                                {/* Harga Modal + Harga Jual */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Harga Modal</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold">Rp</span>
+                                            <input type="number" className={`${inputCls} pl-8`} placeholder="0"
+                                                value={form.pricePerUnit} onChange={e => handleUnitPriceChange(e.target.value)} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Harga Jual</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold">Rp</span>
+                                            <input type="number"
+                                                className="w-full pl-8 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-sm text-slate-700 placeholder:text-slate-400 focus:border-pink-400 focus:ring-2 focus:ring-pink-100 transition-all"
+                                                placeholder="0" value={form.sellPrice}
+                                                onChange={e => setForm(f => ({ ...f, sellPrice: e.target.value }))} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Margin info */}
+                                <div className="flex items-center gap-2 px-3 py-2.5 bg-pink-50 border border-pink-100 rounded-xl">
+                                    <Info size={14} className="text-pink-400 flex-shrink-0" />
+                                    {marginPct !== null ? (
+                                        <p className="text-xs text-pink-600">
+                                            Margin keuntungan saat ini adalah <span className="font-bold">{marginPct}%</span>.
+                                        </p>
+                                    ) : (
+                                        <p className="text-xs text-pink-500">
+                                            Margin keuntungan yang disarankan adalah <span className="font-bold">20%</span>.
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Total Beli */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
+                                        <Tag size={11} /> Total Pembelian
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400 text-xs font-semibold">Rp</span>
+                                        <input type="number"
+                                            className="w-full pl-8 pr-3 py-2.5 bg-pink-50 border border-pink-200 rounded-xl outline-none text-sm font-bold text-pink-700 focus:ring-2 focus:ring-pink-100 transition-all"
+                                            placeholder="0" value={form.totalPrice} onChange={e => handleTotalPriceChange(e.target.value)} />
+                                    </div>
+                                </div>
+
+                                {/* Stok Awal + Satuan */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Stok Masuk</label>
+                                        <div className="relative">
+                                            <input ref={quantityInputRef} type="number" step="0.01"
+                                                className={`${inputCls} pr-12 text-center font-bold`}
+                                                placeholder="0" value={form.quantity} onChange={e => handleQtyChange(e.target.value)} />
+                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium">
+                                                {form.unit || 'Unit'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Satuan</label>
+                                        <input className={`${inputCls} text-center`} placeholder="pcs"
+                                            value={form.unit} onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Qty + Unit + Prices */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Jumlah</label>
-                                <input ref={quantityInputRef} type="number" step="0.01"
-                                    className="input-modern text-center font-bold"
-                                    placeholder="0" value={form.quantity} onChange={e => handleQtyChange(e.target.value)} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Satuan</label>
-                                <input className="input-modern text-center" placeholder="pcs"
-                                    value={form.unit} onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 flex items-center gap-1">
-                                    <Tag size={11} /> Harga Satuan
-                                </label>
-                                <input type="number" className="input-modern" placeholder="Rp"
-                                    value={form.pricePerUnit} onChange={e => handleUnitPriceChange(e.target.value)} />
-                            </div>
-                            <div>
-                                <label className="text-xs font-semibold text-blue-500 mb-1.5 flex items-center gap-1">
-                                    <DollarSign size={11} /> Total Beli
-                                </label>
-                                <input type="number"
-                                    className="w-full px-3 py-3 bg-blue-50 border border-blue-200 rounded-xl outline-none text-sm font-bold text-blue-700 focus:ring-2 focus:ring-blue-100 transition-all"
-                                    placeholder="Rp 0" value={form.totalPrice} onChange={e => handleTotalPriceChange(e.target.value)} />
-                            </div>
-                        </div>
-
-                        {/* Sell Price */}
-                        <div>
-                            <label className="text-xs font-semibold text-pink-500 mb-1.5 flex items-center gap-1">
-                                <DollarSign size={11} /> Harga Jual (Rencana)
-                            </label>
-                            <input type="number"
-                                className="w-full px-3 py-3 bg-pink-50 border border-pink-200 rounded-xl outline-none text-sm font-bold text-pink-700 focus:ring-2 focus:ring-pink-100 transition-all"
-                                placeholder="Rp 0 (tampil di kasir)" value={form.sellPrice}
-                                onChange={e => setForm(f => ({ ...f, sellPrice: e.target.value }))} />
-                        </div>
-
-                        {/* Supplier */}
-                        <div>
-                            <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Supplier</label>
-                            <input className="input-modern" placeholder="Nama Toko / Supplier"
-                                value={form.supplier} onChange={e => setForm(f => ({ ...f, supplier: e.target.value }))} />
-                        </div>
-
-                        {/* Footer buttons inside form scroll area */}
-                        <div className="flex gap-3 pt-2">
+                        {/* Footer */}
+                        <div className="flex gap-3 pt-5 mt-2 border-t border-slate-100">
                             <button type="button" onClick={onClose}
-                                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-semibold text-sm transition-colors">
+                                className="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl font-semibold text-sm transition-colors">
                                 Batal
                             </button>
                             <button type="submit"
-                                className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-200 active:scale-95">
-                                <PackagePlus size={16} /> Simpan Stok
+                                className="flex-1 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-pink-200 active:scale-95">
+                                <Save size={15} /> Simpan Produk
                             </button>
                         </div>
                     </form>

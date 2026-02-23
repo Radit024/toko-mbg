@@ -1,4 +1,4 @@
-import { LayoutDashboard, ShoppingCart, Wallet, History as HistoryIcon, Package, PackagePlus, FileText } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Wallet, History as HistoryIcon, Package, FileText } from 'lucide-react';
 
 export const navItems = {
     main: [
@@ -9,7 +9,6 @@ export const navItems = {
     ],
     inventory: [
         { id: 'inventory',  label: 'Stok Barang',     icon: Package },
-        { id: 'purchases',  label: 'Restock (Beli)',  icon: PackagePlus },
         { id: 'reports',    label: 'Laporan',         icon: FileText },
     ],
 };

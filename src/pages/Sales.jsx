@@ -9,10 +9,7 @@ import {
 import { formatCurrency } from '../utils/helpers';
 import CameraScanner from '../components/ui/CameraScanner';
 
-const DEFAULT_TAX_RATE = 0.11;
-const TAX_RATE = Number.isNaN(Number(process.env.REACT_APP_TAX_RATE))
-    ? DEFAULT_TAX_RATE
-    : Number(process.env.REACT_APP_TAX_RATE);
+const TAX_RATE = Number(import.meta.env.VITE_TAX_RATE) || 0.11;
 
 const CATEGORY_ICONS = {
     Semua: LayoutGrid,
@@ -114,7 +111,7 @@ export default function Sales({ inventory, handleSaveOrder }) {
 
     const subtotal = cart.reduce((s, i) => s + i.subtotal, 0);
     const tax = Math.round(subtotal * TAX_RATE);
-        const success = await handleSaveOrder(cart, date, notes, customerName || 'Pelanggan Umum', paymentMethod, paymentStatus, discount, tax);
+    const total = subtotal + tax - discount;
 
     const handleProcess = async () => {
         const success = await handleSaveOrder(cart, date, notes, customerName || 'Pelanggan Umum', paymentMethod, paymentStatus);
