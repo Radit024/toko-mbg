@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { X, Users, Copy } from 'lucide-react';
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
-export default function ConnectStoreModal({ setShowStoreModal, user, activeStoreId, storeProfile, handleConnectStore, db, appId }) {
+export default function ConnectStoreModal({ setShowStoreModal, user, activeStoreId, storeProfile, handleConnectStore, handleSaveStoreSettings }) {
     const [inputStoreId, setInputStoreId] = useState('');
     const [storeName, setStoreName] = useState(storeProfile?.storeName || '');
     const [customAlias, setCustomAlias] = useState(storeProfile?.customAlias || '');
@@ -12,35 +11,13 @@ export default function ConnectStoreModal({ setShowStoreModal, user, activeStore
 
     const handleSaveProfile = async () => {
         if (!isOwner) return;
+        setLoadingAlias(true);
         try {
-            const profileRef = doc(db, "artifacts", appId, "users", user.uid, "settings", "profile");
-            await setDoc(profileRef, {
-                storeName: storeName,
-                customAlias: customAlias,
-                updatedAt: serverTimestamp()
-            }, { merge: true });
-
-            if (customAlias) {
-                setLoadingAlias(true);
-                const aliasId = customAlias.toLowerCase().replace(/\s+/g, '-');
-                const aliasRef = doc(db, "artifacts", appId, "public", "data", "store_aliases", aliasId);
-
-                const snap = await getDoc(aliasRef);
-                if (snap.exists() && snap.data().ownerUid !== user.uid) {
-                    alert("Maaf, ID Custom ini sudah dipakai toko lain. Cari yang lain ya!");
-                    setLoadingAlias(false);
-                    return;
-                }
-
-                await setDoc(aliasRef, {
-                    ownerUid: user.uid,
-                    storeName: storeName
-                });
-                setLoadingAlias(false);
-            }
+            await handleSaveStoreSettings(storeName, customAlias);
             alert("Pengaturan Toko Disimpan!");
         } catch (e) {
             alert("Gagal simpan: " + e.message);
+        } finally {
             setLoadingAlias(false);
         }
     };

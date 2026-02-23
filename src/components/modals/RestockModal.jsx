@@ -72,8 +72,8 @@ export default function RestockModal({ inventory, handlePurchase, onClose }) {
 
     const submit = async (e) => {
         e.preventDefault();
-        await handlePurchase(form);
-        onClose();
+        const success = await handlePurchase(form);
+        if (success) onClose();
     };
 
     return (

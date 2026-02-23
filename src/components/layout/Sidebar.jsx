@@ -32,7 +32,7 @@ const NavButton = ({ id, label, icon: Icon, activeTab, setActiveTab, setIsSideba
 
 export default function Sidebar({ isSidebarOpen, isSidebarMini, setIsSidebarMini, activeTab, setActiveTab, setIsSidebarOpenState, handleLogout, navItems, user, storeProfile }) {
     const ownerName = storeProfile?.ownerName || user?.displayName || user?.email?.split('@')[0] || 'User';
-    const storeName = storeProfile?.storeName || 'Toko MBG';
+    const storeName = storeProfile?.storeName || 'Mutiara Store';
     const photoURL = storeProfile?.photoURL || user?.photoURL;
     const initials = ownerName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 

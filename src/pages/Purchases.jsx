@@ -43,10 +43,10 @@ export default function Purchases({ inventory, restockLogs, handlePurchase, setE
         }
     };
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
-        handlePurchase(form);
-        setForm({ ...form, quantity: '', pricePerUnit: '', totalPrice: '', barcode: '', existingId: null, sellPrice: '' });
+        const success = await handlePurchase(form);
+        if (success) setForm({ ...form, quantity: '', pricePerUnit: '', totalPrice: '', barcode: '', existingId: null, sellPrice: '' });
     };
 
     const processBarcodeRestock = (scannedBarcode) => {

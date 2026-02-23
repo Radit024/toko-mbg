@@ -51,7 +51,7 @@ export default function Login() {
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 overflow-y-auto"
+        <div className="fixed inset-0 z-[60] font-sans flex items-center justify-center p-4 overflow-y-auto"
             style={{ background: 'linear-gradient(135deg, #fce7f3 0%, #fdf2f8 50%, #fff1f2 100%)' }}>
 
             {/* Card */}

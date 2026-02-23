@@ -30,8 +30,7 @@ import ConnectStoreModal from './components/modals/ConnectStoreModal';
 import UserProfileModal from './components/modals/UserProfileModal';
 import WithdrawalModal from './components/modals/WithdrawalModal';
 
-// Firebase (dibutuhkan ConnectStoreModal)
-import { db, appId } from './config/firebase';
+
 
 export default function App() {
     const ui = useUIState();
@@ -166,8 +165,7 @@ export default function App() {
                     activeStoreId={data.activeStoreId}
                     storeProfile={data.storeProfile}
                     handleConnectStore={data.handleConnectStore}
-                    db={db}
-                    appId={appId}
+                    handleSaveStoreSettings={data.handleSaveStoreSettings}
                 />
             )}
             {data.showProfileEdit && (
