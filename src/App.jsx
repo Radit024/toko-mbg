@@ -1,5 +1,11 @@
-﻿import React, { useState } from 'react';
+﻿import React from 'react';
+
+// Hooks
 import { useAppData } from './hooks/useAppData';
+import { useUIState } from './hooks/useUIState';
+
+// Config
+import { navItems } from './config/navItems';
 
 // Pages
 import Login from './pages/Login';
@@ -14,240 +20,173 @@ import Reports from './pages/Reports';
 // Layout & UI
 import Sidebar from './components/layout/Sidebar';
 import ReceiptTemplate from './components/ui/ReceiptTemplate';
+import MobileTopBar from './components/layout/MobileTopBar';
+import MobileBottomNav from './components/layout/MobileBottomNav';
 
 // Modals
-import WithdrawalModal from './components/modals/WithdrawalModal';
-import EditRestockModal from './components/modals/EditRestockModal';
 import EditOrderModal from './components/modals/EditOrderModal';
-import UserProfileModal from './components/modals/UserProfileModal';
+import EditRestockModal from './components/modals/EditRestockModal';
 import ConnectStoreModal from './components/modals/ConnectStoreModal';
+import UserProfileModal from './components/modals/UserProfileModal';
+import WithdrawalModal from './components/modals/WithdrawalModal';
 
-// Icons
-import { LayoutDashboard, ShoppingCart, PackagePlus, Package, Wallet, FileText, History as HistoryIcon, Menu, Plus, ShoppingBasket } from 'lucide-react';
-
-// Firebase (hanya untuk ConnectStoreModal)
+// Firebase (dibutuhkan ConnectStoreModal)
 import { db, appId } from './config/firebase';
 
 export default function App() {
-    // --- UI STATE (layout & navigasi) ---
-    const [activeTab, setActiveTab] = useState('dashboard');
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isSidebarMini, setIsSidebarMini] = useState(false);
-    const [printOrder, setPrintOrder] = useState(null);
-    const [editingOrder, setEditingOrder] = useState(null);
-    const [editingRestock, setEditingRestock] = useState(null);
+    const ui = useUIState();
+    const data = useAppData();
 
-    // --- DATA & BUSINESS LOGIC (dari custom hook) ---
-    const {
-        user, authLoading, activeStoreId, storeProfile,
-        showStoreModal, setShowStoreModal,
-        showProfileEdit, setShowProfileEdit,
-        showWithdraw, setShowWithdraw,
-        inventory, orders, generalExpenses, restockLogs, withdrawals,
-        stats,
-        handleLogout,
-        handleConnectStore,
-        handleUpdateStoreProfile,
-        handleUpdateUserProfile,
-        handleChangePassword,
-        handlePurchase,
-        handleUpdateRestock,
-        handleDeleteRestock,
-        handleDeleteInventoryItem,
-        handleSaveOrder,
-        handleFullUpdateOrder,
-        handleQuickPay,
-        handleUpdateOrderExpenses,
-        handleDeleteOrder,
-        handleGeneralExpense,
-        handleWithdrawal,
-        handleDeleteWithdrawal,
-    } = useAppData();
-
-    // --- PRINT HANDLER ---
-    const handlePrint = (order, sequentialNumber) => {
-        setPrintOrder({ ...order, sequentialNumber });
-        setTimeout(() => { window.print(); }, 500);
-    };
-
-    // --- NAV CONFIG ---
-    const navItems = {
-        main: [
-            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-            { id: 'sales', label: 'Kasir (Jual)', icon: ShoppingCart },
-            { id: 'expenses', label: 'Biaya & Ops', icon: Wallet },
-            { id: 'history', label: 'Riwayat Nota', icon: HistoryIcon },
-        ],
-        inventory: [
-            { id: 'inventory', label: 'Stok Barang', icon: Package },
-            { id: 'purchases', label: 'Restock (Beli)', icon: PackagePlus },
-            { id: 'reports', label: 'Laporan', icon: FileText },
-        ]
-    };
-
-    // --- RENDER GUARDS ---
-    if (authLoading) return (
+    if (data.authLoading) return (
         <div className="flex h-screen items-center justify-center text-pink-600 font-bold">
             Memuat data...
         </div>
     );
-    if (!user) return <Login />;
+    if (!data.user) return <Login />;
 
     return (
         <div className="flex min-h-screen bg-[#FDF2F8] font-sans text-slate-800">
 
-            {/* SIDEBAR */}
             <Sidebar
-                isSidebarOpen={isSidebarOpen}
-                isSidebarMini={isSidebarMini}
-                setIsSidebarMini={setIsSidebarMini}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                setIsSidebarOpenState={setIsSidebarOpen}
-                handleLogout={() => handleLogout(setActiveTab)}
+                isSidebarOpen={ui.isSidebarOpen}
+                isSidebarMini={ui.isSidebarMini}
+                setIsSidebarMini={ui.setIsSidebarMini}
+                activeTab={ui.activeTab}
+                setActiveTab={ui.setActiveTab}
+                setIsSidebarOpenState={ui.setIsSidebarOpen}
+                handleLogout={() => data.handleLogout(ui.setActiveTab)}
                 navItems={navItems}
-                user={user}
-                storeProfile={storeProfile}
+                user={data.user}
+                storeProfile={data.storeProfile}
             />
 
-            {/* SIDEBAR OVERLAY (mobile) */}
-            {isSidebarOpen && (
+            {ui.isSidebarOpen && (
                 <div
                     className="fixed inset-0 bg-black/20 z-40 md:hidden backdrop-blur-sm"
-                    onClick={() => setIsSidebarOpen(false)}
+                    onClick={() => ui.setIsSidebarOpen(false)}
                 />
             )}
 
-            {/* MAIN CONTENT */}
-            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${isSidebarMini ? 'md:ml-20' : 'md:ml-64'}`}>
+            <main className={`flex-1 transition-all duration-300 print:ml-0 print:w-full print:p-0 ${ui.isSidebarMini ? 'md:ml-20' : 'md:ml-64'}`}>
 
-                {/* MOBILE TOP BAR */}
-                <div className="md:hidden sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-pink-50 px-6 py-4 flex justify-between items-center print:hidden shadow-sm">
-                    <div className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                        <ShoppingBasket className="text-pink-600" /> Mutiara Store
-                    </div>
-                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-pink-50 text-pink-600 rounded-xl">
-                        <Menu />
-                    </button>
-                </div>
+                <MobileTopBar onMenuClick={() => ui.setIsSidebarOpen(true)} />
 
-                {/* PAGE CONTENT */}
                 <div className="p-4 md:p-10 max-w-7xl mx-auto">
-                    {activeTab === 'dashboard' && (
+                    {ui.activeTab === 'dashboard' && (
                         <Dashboard
-                            user={user} storeProfile={storeProfile} activeStoreId={activeStoreId}
-                            stats={stats} orders={orders} inventory={inventory}
-                            setShowStoreModal={setShowStoreModal}
-                            setShowProfileEdit={setShowProfileEdit}
-                            setShowWithdraw={setShowWithdraw}
-                            setActiveTab={setActiveTab}
+                            user={data.user}
+                            storeProfile={data.storeProfile}
+                            activeStoreId={data.activeStoreId}
+                            stats={data.stats}
+                            orders={data.orders}
+                            inventory={data.inventory}
+                            setShowStoreModal={data.setShowStoreModal}
+                            setShowProfileEdit={data.setShowProfileEdit}
+                            setShowWithdraw={data.setShowWithdraw}
+                            setActiveTab={ui.setActiveTab}
                         />
                     )}
-                    {activeTab === 'sales' && (
+                    {ui.activeTab === 'sales' && (
                         <Sales
-                            inventory={inventory}
-                            handleSaveOrder={handleSaveOrder}
+                            inventory={data.inventory}
+                            handleSaveOrder={data.handleSaveOrder}
                         />
                     )}
-                    {activeTab === 'expenses' && (
+                    {ui.activeTab === 'expenses' && (
                         <Expenses
-                            orders={orders}
-                            generalExpenses={generalExpenses}
-                            handleUpdateOrderExpenses={handleUpdateOrderExpenses}
-                            handleGeneralExpense={handleGeneralExpense}
+                            orders={data.orders}
+                            generalExpenses={data.generalExpenses}
+                            handleUpdateOrderExpenses={data.handleUpdateOrderExpenses}
+                            handleGeneralExpense={data.handleGeneralExpense}
                         />
                     )}
-                    {activeTab === 'history' && (
+                    {ui.activeTab === 'history' && (
                         <History
-                            orders={orders}
-                            setEditingOrder={setEditingOrder}
-                            handleDeleteOrder={handleDeleteOrder}
-                            handlePrint={handlePrint}
-                            handleQuickPay={handleQuickPay}
+                            orders={data.orders}
+                            setEditingOrder={ui.setEditingOrder}
+                            handleDeleteOrder={data.handleDeleteOrder}
+                            handlePrint={ui.handlePrint}
+                            handleQuickPay={data.handleQuickPay}
                         />
                     )}
-                    {activeTab === 'inventory' && (
+                    {ui.activeTab === 'inventory' && (
                         <Inventory
-                            inventory={inventory}
-                            handleDeleteInventoryItem={handleDeleteInventoryItem}
-                            setActiveTab={setActiveTab}
+                            inventory={data.inventory}
+                            handleDeleteInventoryItem={data.handleDeleteInventoryItem}
+                            setActiveTab={ui.setActiveTab}
                         />
                     )}
-                    {activeTab === 'purchases' && (
+                    {ui.activeTab === 'purchases' && (
                         <Purchases
-                            inventory={inventory}
-                            restockLogs={restockLogs}
-                            handlePurchase={handlePurchase}
-                            setEditingRestock={setEditingRestock}
-                            handleDeleteRestock={handleDeleteRestock}
+                            inventory={data.inventory}
+                            restockLogs={data.restockLogs}
+                            handlePurchase={data.handlePurchase}
+                            setEditingRestock={ui.setEditingRestock}
+                            handleDeleteRestock={data.handleDeleteRestock}
                         />
                     )}
-                    {activeTab === 'reports' && (
+                    {ui.activeTab === 'reports' && (
                         <Reports
-                            orders={orders}
-                            inventory={inventory}
+                            orders={data.orders}
+                            inventory={data.inventory}
                         />
                     )}
                 </div>
 
-                {printOrder && <ReceiptTemplate order={printOrder} />}
+                {ui.printOrder && <ReceiptTemplate order={ui.printOrder} />}
             </main>
 
-            {/* MOBILE BOTTOM NAVIGATION */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 flex justify-around z-40 pb-safe print:hidden shadow-[0_-5px_10px_rgba(0,0,0,0.02)]">
-                <button onClick={() => setActiveTab('dashboard')} className={`p-3 rounded-2xl transition-all ${activeTab === 'dashboard' ? 'bg-pink-50 text-pink-600' : 'text-gray-400'}`}>
-                    <LayoutDashboard size={24} />
-                </button>
-                <button onClick={() => setActiveTab('sales')} className={`p-3 rounded-2xl transition-all ${activeTab === 'sales' ? 'bg-pink-600 text-white shadow-lg shadow-pink-200 -translate-y-2' : 'text-gray-400'}`}>
-                    <Plus size={28} />
-                </button>
-                <button onClick={() => setActiveTab('history')} className={`p-3 rounded-2xl transition-all ${activeTab === 'history' ? 'bg-pink-50 text-pink-600' : 'text-gray-400'}`}>
-                    <HistoryIcon size={24} />
-                </button>
-            </div>
+            <MobileBottomNav activeTab={ui.activeTab} setActiveTab={ui.setActiveTab} />
 
-            {/* MODALS */}
-            {editingOrder && (
+            {ui.editingOrder && (
                 <EditOrderModal
-                    editingOrder={editingOrder}
-                    setEditingOrder={setEditingOrder}
-                    inventory={inventory}
-                    handleFullUpdateOrder={(orig, items, meta) => handleFullUpdateOrder(orig, items, meta, setEditingOrder)}
+                    editingOrder={ui.editingOrder}
+                    setEditingOrder={ui.setEditingOrder}
+                    inventory={data.inventory}
+                    handleFullUpdateOrder={(orig, items, meta) =>
+                        data.handleFullUpdateOrder(orig, items, meta, ui.setEditingOrder)
+                    }
                 />
             )}
-            {editingRestock && (
+            {ui.editingRestock && (
                 <EditRestockModal
-                    editingRestock={editingRestock}
-                    setEditingRestock={setEditingRestock}
-                    inventory={inventory}
-                    handleUpdateRestock={(id, data) => handleUpdateRestock(id, data, setEditingRestock)}
+                    editingRestock={ui.editingRestock}
+                    setEditingRestock={ui.setEditingRestock}
+                    inventory={data.inventory}
+                    handleUpdateRestock={(id, d) =>
+                        data.handleUpdateRestock(id, d, ui.setEditingRestock)
+                    }
                 />
             )}
-            {showStoreModal && (
+            {data.showStoreModal && (
                 <ConnectStoreModal
-                    setShowStoreModal={setShowStoreModal}
-                    user={user} activeStoreId={activeStoreId}
-                    storeProfile={storeProfile}
-                    handleConnectStore={handleConnectStore}
-                    db={db} appId={appId}
+                    setShowStoreModal={data.setShowStoreModal}
+                    user={data.user}
+                    activeStoreId={data.activeStoreId}
+                    storeProfile={data.storeProfile}
+                    handleConnectStore={data.handleConnectStore}
+                    db={db}
+                    appId={appId}
                 />
             )}
-            {showProfileEdit && (
+            {data.showProfileEdit && (
                 <UserProfileModal
-                    setShowProfileEdit={setShowProfileEdit}
-                    user={user} storeProfile={storeProfile} activeStoreId={activeStoreId}
-                    handleUpdateStoreProfile={handleUpdateStoreProfile}
-                    handleUpdateUserProfile={handleUpdateUserProfile}
-                    handleChangePassword={handleChangePassword}
+                    setShowProfileEdit={data.setShowProfileEdit}
+                    user={data.user}
+                    storeProfile={data.storeProfile}
+                    activeStoreId={data.activeStoreId}
+                    handleUpdateStoreProfile={data.handleUpdateStoreProfile}
+                    handleUpdateUserProfile={data.handleUpdateUserProfile}
+                    handleChangePassword={data.handleChangePassword}
                 />
             )}
-            {showWithdraw && (
+            {data.showWithdraw && (
                 <WithdrawalModal
-                    onClose={() => setShowWithdraw(false)}
-                    handleWithdrawal={handleWithdrawal}
-                    withdrawals={withdrawals}
-                    handleDeleteWithdrawal={handleDeleteWithdrawal}
-                    user={user}
+                    onClose={() => data.setShowWithdraw(false)}
+                    handleWithdrawal={data.handleWithdrawal}
+                    withdrawals={data.withdrawals}
+                    handleDeleteWithdrawal={data.handleDeleteWithdrawal}
+                    user={data.user}
                 />
             )}
 
